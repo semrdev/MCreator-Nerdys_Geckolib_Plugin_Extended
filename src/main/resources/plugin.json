@@ -1,14 +1,13 @@
 {
   "id": "geckolib_plugin",
   "minversion": 202300217118,
-  "weight": 3001,
+  "weight": 3002,
   "javaplugin": "net.nerdypuzzle.geckolib.Launcher",
   "info": {
-    "name": "GeckoLib Plugin",
+    "name": "GeckoLib Plugin Extended",
     "version": "4.9.2",
-    "description": "Adds GeckoLib support for 1.19.2, 1.19.4 and 1.20.1",
-    "author": "NerdyPuzzle",
-    "pluginPageID": 91484,
-    "updateJSONURL": "https://raw.githubusercontent.com/NerdyPuzzle/MCreator-Nerdys_Geckolib_Plugin/main/update.json"
+    "description": "Adds GeckoLib support for 1.19.2 and 1.20.1",
+    "author": "NerdyPuzzle & Caly",
+    "updateJSONURL": "https://github.com/semrdev/MCreator-Nerdys_Geckolib_Plugin_Extended/blob/MCreator-2023.2/update.json"
   }
 }
