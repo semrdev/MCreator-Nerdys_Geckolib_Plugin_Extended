@@ -974,7 +974,14 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		if ((event.isMoving() || !(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F))
 		<#if data.enable8>&& this.isOnGround()</#if> <#if data.enable9>&& !this.isVehicle()</#if>
 		<#if data.enable10>&& !this.isAggressive()</#if>) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation2}", EDefaultLoopTypes.LOOP));
+			<#if data.enable7>
+			if (this.isSprinting()) {
+				event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation7}", EDefaultLoopTypes.LOOP));
+			}
+			else {
+			</#if>
+				event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation2}", EDefaultLoopTypes.LOOP));
+			<#if data.enable7> } </#if>
 			return PlayState.CONTINUE;
 		}
 		</#if>
@@ -993,12 +1000,6 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		<#if data.enable6>
 		if (this.isShiftKeyDown()) {
 			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation6}", EDefaultLoopTypes.LOOP));
-			return PlayState.CONTINUE;
-		}
-		</#if>
-		<#if data.enable7>
-		if (this.isSprinting()) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation7}", EDefaultLoopTypes.LOOP));
 			return PlayState.CONTINUE;
 		}
 		</#if>
