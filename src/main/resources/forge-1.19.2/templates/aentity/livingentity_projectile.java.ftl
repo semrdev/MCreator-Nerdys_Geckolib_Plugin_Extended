@@ -20,7 +20,7 @@
  # 
  # As a special exception, you may create a larger work that contains part or 
  # all of the MCreator code generator templates (*.ftl files) and distribute 
- # that work under terms of your choice, so long as that work isn't itself a 
+ # that work under terms of your choice, so long as that work is not itself a 
  # template for code generation. Alternatively, if you modify or redistribute 
  # the template itself, you may (at your option) remove this special exception, 
  # which will cause the template and the resulting code generator output files 
