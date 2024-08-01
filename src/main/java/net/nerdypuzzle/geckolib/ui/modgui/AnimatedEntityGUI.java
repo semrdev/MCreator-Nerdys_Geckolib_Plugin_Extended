@@ -82,7 +82,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private final VTextField mobName = new VTextField();
 
     private final JSpinner attackStrength = new JSpinner(new SpinnerNumberModel(3, 0, 10000, 1));
-    private final JSpinner movementSpeed = new JSpinner(new SpinnerNumberModel(0.3, 0, 50, 0.1));
+    private final JSpinner movementSpeed = new JSpinner(new SpinnerNumberModel(0.25, 0, 50, 0.05));
     private final JSpinner armorBaseValue = new JSpinner(new SpinnerNumberModel(0.0, 0, 100, 0.1));
     private final JSpinner health = new JSpinner(new SpinnerNumberModel(10, 0, 1024, 1));
     private final JSpinner knockbackResistance = new JSpinner(new SpinnerNumberModel(0, 0, 1000, 0.1));
