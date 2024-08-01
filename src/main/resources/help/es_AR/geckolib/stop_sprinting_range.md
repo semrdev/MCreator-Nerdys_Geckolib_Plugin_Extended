@@ -1,0 +1,1 @@
+La distancia a la que se debe dejar de correr, para cuando esta entidad está corriendo para alcanzar a su dueño.

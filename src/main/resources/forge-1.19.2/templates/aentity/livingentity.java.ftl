@@ -158,6 +158,30 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 				}
 			}
 		};
+		<#else>
+		this.moveControl = new MoveControl(this) {
+			@Override public void tick() {
+			    ${name}Entity.this.updateSprintState();
+				super.tick();
+			}
+		};
+		</#if>
+	}
+
+	public void updateSprintState() {
+
+		<#if data.sprintToFollow && data.tameable && data.breedable>
+		if (${name}Entity.this.isTame() && ${name}Entity.this.getOwner() != null) {
+			if (!${name}Entity.this.isSprinting()) {
+				if (<#if data.mimicTargetSprinting>${name}Entity.this.getOwner().isSprinting() || </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) >= ${data.sprintingRange}) {
+						${name}Entity.this.setSprinting(true);
+				}
+			} else if (${name}Entity.this.isSprinting()) {
+				if (<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) {
+						${name}Entity.this.setSprinting(false);
+				}
+			}
+		}
 		</#if>
 	}
 
@@ -987,7 +1011,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		</#if>
 		<#if data.enable3>
 		if (this.isDeadOrDying()) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation3}", 						EDefaultLoopTypes.PLAY_ONCE));
+			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation3}", EDefaultLoopTypes.PLAY_ONCE));
 			return PlayState.CONTINUE;
 		}
 		</#if>
@@ -1017,7 +1041,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		</#if>
 		<#if data.enable10>
 		if (this.isAggressive() && event.isMoving()<#if data.enable9> && !this.isVehicle()</#if>) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation10}", 						EDefaultLoopTypes.LOOP));
+			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation10}", EDefaultLoopTypes.LOOP));
 			return PlayState.CONTINUE;
 		}
 		</#if>
@@ -1040,9 +1064,9 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			this.swinging = false;
 		}
 		if (<#if data.ranged>(</#if>this.swinging<#if data.ranged> || this.entityData.get(SHOOT))</#if>
-		&& event.getController().getAnimationState().equals(software.bernie.geckolib3.core.AnimationState.Stopped)) 					{
+		&& event.getController().getAnimationState().equals(software.bernie.geckolib3.core.AnimationState.Stopped)) {
 			event.getController().markNeedsReload();
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation4}", 							EDefaultLoopTypes.PLAY_ONCE));
+			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation4}", EDefaultLoopTypes.PLAY_ONCE));
 				return PlayState.CONTINUE;
 		}
 	return PlayState.CONTINUE;
