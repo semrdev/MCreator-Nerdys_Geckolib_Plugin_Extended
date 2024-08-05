@@ -161,14 +161,14 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		<#else>
 		this.moveControl = new MoveControl(this) {
 			@Override public void tick() {
-			    ${name}Entity.this.updateSprintState();
+			    ${name}Entity.this.updateSprintState(operation == MoveControl.Operation.WAIT);
 				super.tick();
 			}
 		};
 		</#if>
 	}
 
-	public void updateSprintState() {
+	public void updateSprintState(boolean isWaiting) {
 
 		<#if data.sprintToFollow && data.tameable && data.breedable>
 		if (${name}Entity.this.isTame() && ${name}Entity.this.getOwner() != null) {
@@ -177,7 +177,8 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 						${name}Entity.this.setSprinting(true);
 				}
 			} else if (${name}Entity.this.isSprinting()) {
-				if (<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) {
+				if ((<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) 
+				     || isWaiting) {
 						${name}Entity.this.setSprinting(false);
 				}
 			}
@@ -871,9 +872,9 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         </#if>
         <#if data.flyingMob>
            this.setNoGravity(true);
-           </#if>
+		</#if>
         }
-        </#if>
+	</#if>
 
 	public static void init() {
 		<#if data.spawnThisMob>
