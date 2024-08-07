@@ -74,7 +74,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	private boolean swinging;
 	private boolean lastloop;
 	private long lastSwing;
-        public String animationprocedure = "empty";
+	public String animationprocedure = "empty";
 	<#if data.isBoss>
 	private final ServerBossEvent bossInfo = new ServerBossEvent(this.getDisplayName(),
 		ServerBossEvent.BossBarColor.${data.bossBarColor}, ServerBossEvent.BossBarOverlay.${data.bossBarType});
@@ -168,6 +168,9 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		</#if>
 	}
 
+	private int sprintFollowWindDownTicks = 2;
+	private int sprintFollowWindDownCounter = 0;
+
 	public void updateSprintState(boolean isWaiting) {
 
 		<#if data.sprintToFollow && data.tameable && data.breedable>
@@ -179,7 +182,11 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			} else if (${name}Entity.this.isSprinting()) {
 				if ((<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) 
 				     || isWaiting) {
-						${name}Entity.this.setSprinting(false);
+						sprintFollowWindDownCounter++;
+						if (sprintFollowWindDownCounter >= sprintFollowWindDownTicks) {
+							${name}Entity.this.setSprinting(false);
+							sprintFollowWindDownCounter = 0;
+						}
 				}
 			}
 		}
