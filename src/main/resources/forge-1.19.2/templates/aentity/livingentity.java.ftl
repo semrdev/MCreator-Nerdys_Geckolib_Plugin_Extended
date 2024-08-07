@@ -158,31 +158,6 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 				}
 			}
 		};
-		<#else>
-		this.moveControl = new MoveControl(this) {
-			@Override public void tick() {
-			    ${name}Entity.this.updateSprintState(operation == MoveControl.Operation.WAIT);
-				super.tick();
-			}
-		};
-		</#if>
-	}
-
-	public void updateSprintState(boolean isWaiting) {
-
-		<#if data.sprintToFollow && data.tameable && data.breedable>
-		if (${name}Entity.this.isTame() && ${name}Entity.this.getOwner() != null) {
-			if (!${name}Entity.this.isSprinting()) {
-				if (<#if data.mimicTargetSprinting>${name}Entity.this.getOwner().isSprinting() || </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) >= ${data.sprintingRange}) {
-						${name}Entity.this.setSprinting(true);
-				}
-			} else if (${name}Entity.this.isSprinting()) {
-				if ((<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) 
-				     || isWaiting) {
-						${name}Entity.this.setSprinting(false);
-				}
-			}
-		}
 		</#if>
 	}
 
@@ -245,7 +220,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		super.registerGoals();
 
 		<#if aicode??>
-            ${aicode}
+			${aicode}
         </#if>
 
         <#if data.ranged>
@@ -258,7 +233,49 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	}
 	</#if>
 
-        <#if data.ranged>
+	<#if data.sprintToFollow && data.tameable && data.breedable>
+	public class SprintFollowOwnerGoal extends FollowOwnerGoal {
+
+		private TamableAnimal follower;
+
+		public SprintFollowOwnerGoal(TamableAnimal p_25294_, double p_25295_, float p_25296_, float p_25297_, boolean p_25298_) {
+			super(p_25294_, p_25295_, p_25296_, p_25297_, p_25298_);
+			follower = p_25294_;
+		}
+
+		@Override public void tick() {
+			${name}Entity.updateSprintState(follower, follower.getOwner());
+			super.tick();
+		}
+
+		@Override public void stop() {
+			follower.setSprinting(false);
+			super.stop();
+		}
+
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+	}
+	</#if>
+
+	public static void updateSprintState(LivingEntity mob, LivingEntity target) {
+		ProyectodepruebasMod.LOGGER.info("Update Sprint State: mob " + mob + ", target: " + target);
+
+		if (mob != null && target != null) {
+			if (!mob.isSprinting()) {
+				if (<#if data.mimicTargetSprinting>target.isSprinting() || </#if>mob.distanceTo(target) >= ${data.sprintingRange}) {
+						mob.setSprinting(true);
+				}
+			} else if (mob.isSprinting()) {
+				if ((<#if data.mimicTargetSprinting>!(target.isSprinting()) &&  </#if>mob.distanceTo(target) <= ${data.stopSprintingRange})) {
+						mob.setSprinting(false);
+				}
+			}
+		}
+	}
+
+	<#if data.ranged>
 	public class RangedAttackGoal extends Goal {
 		private final Mob mob;
 		private final RangedAttackMob rangedAttackMob;
