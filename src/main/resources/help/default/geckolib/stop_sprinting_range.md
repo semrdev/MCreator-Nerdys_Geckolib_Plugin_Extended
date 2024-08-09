@@ -1,0 +1,1 @@
+The distance to stop sprinting, for when this entity is sprinting to catch up to its owner. 

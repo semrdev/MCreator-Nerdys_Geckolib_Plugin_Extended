@@ -72,6 +72,10 @@ public class AnimatedEntity extends GeneratableElement
     public double armorBaseValue;
     public int trackingRange;
     public int followRange;
+    public boolean sprintToFollow;
+    public boolean mimicTargetSprinting;
+    public int sprintingRange;
+    public int stopSprintingRange;
     public int health;
     public int xpAmount;
     public boolean waterMob;
@@ -194,6 +198,8 @@ public class AnimatedEntity extends GeneratableElement
         this.rangedAttackRadius = 10;
 
         this.followRange = 16;
+        this.sprintingRange = 8;
+        this.stopSprintingRange = 2;
 
         this.inventorySize = 9;
         this.inventoryStackSize = 64;

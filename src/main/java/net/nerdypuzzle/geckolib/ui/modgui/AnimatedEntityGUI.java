@@ -85,7 +85,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private final VTextField mobName = new VTextField();
 
     private final JSpinner attackStrength = new JSpinner(new SpinnerNumberModel(3, 0, 10000, 1));
-    private final JSpinner movementSpeed = new JSpinner(new SpinnerNumberModel(0.3, 0, 50, 0.1));
+    private final JSpinner movementSpeed = new JSpinner(new SpinnerNumberModel(0.25, 0, 50, 0.05));
     private final JSpinner armorBaseValue = new JSpinner(new SpinnerNumberModel(0.0, 0, 100, 0.1));
     private final JSpinner health = new JSpinner(new SpinnerNumberModel(10, 0, 1024, 1));
     private final JSpinner knockbackResistance = new JSpinner(new SpinnerNumberModel(0, 0, 1000, 0.1));
@@ -93,6 +93,11 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
     private final JSpinner trackingRange = new JSpinner(new SpinnerNumberModel(64, 0, 10000, 1));
     private final JSpinner followRange = new JSpinner(new SpinnerNumberModel(16, 0, 2048, 1));
+
+    private final JCheckBox sprintToFollow = L10N.checkbox("elementgui.living_entity.sprint_to_follow");
+    private final JCheckBox mimicTargetSprinting = L10N.checkbox("elementgui.living_entity.mimic_target_sprinting");
+    private final JSpinner sprintingRange = new JSpinner(new SpinnerNumberModel(8, 0, 2048, 1));
+    private final JSpinner stopSprintingRange = new JSpinner(new SpinnerNumberModel(2, 0, 2048, 1));
 
     private final JSpinner rangedAttackInterval = new JSpinner(new SpinnerNumberModel(20, 0, 1024, 1));
     private final JSpinner rangedAttackRadius = new JSpinner(new SpinnerNumberModel(10, 0, 1024, 0.1));
@@ -386,7 +391,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         JPanel pane7 = new JPanel(new BorderLayout(0, 0));
         JPanel pane8 = new JPanel(new BorderLayout(0, 0));
 
-        JPanel subpane1 = new JPanel(new GridLayout(12, 2, 0, 2));
+        JPanel subpane1 = new JPanel(new GridLayout(14, 2, 0, 2));
 
         immuneToFire.setOpaque(false);
         immuneToArrows.setOpaque(false);
@@ -430,6 +435,16 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
                         HelpUtils.helpButton(this.withEntry("entity/follow_range")),
                         HelpUtils.helpButton(this.withEntry("entity/tracking_range"))));
         subpane1.add(PanelUtils.gridElements(1, 2, 2, 0, followRange, trackingRange));
+
+        subpane1.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/sprint_to_follow"),
+                L10N.label("elementgui.living_entity.sprint_to_follow")));
+        subpane1.add(PanelUtils.join(FlowLayout.LEFT, 0, 0, sprintToFollow, mimicTargetSprinting));
+
+        subpane1.add(
+                PanelUtils.join(FlowLayout.LEFT, L10N.label("elementgui.living_entity.sprinting_ranges"),
+                        HelpUtils.helpButton(this.withEntry("geckolib/sprinting_range")),
+                        HelpUtils.helpButton(this.withEntry("geckolib/stop_sprinting_range"))));
+        subpane1.add(PanelUtils.gridElements(1, 2, 2, 0, sprintingRange, stopSprintingRange));
 
         subpane1.add(
                 PanelUtils.join(FlowLayout.LEFT, L10N.label("elementgui.living_entity.attack_strenght_armor_value"),
@@ -555,6 +570,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         armorBaseValue.setPreferredSize(new Dimension(250, 32));
         movementSpeed.setPreferredSize(new Dimension(250, 32));
         trackingRange.setPreferredSize(new Dimension(250, 32));
+        sprintToFollow.setOpaque(false);
+        mimicTargetSprinting.setOpaque(false);
+        sprintingRange.setPreferredSize(new Dimension(250, 32));
+        stopSprintingRange.setPreferredSize(new Dimension(250, 32));
         attackStrength.setPreferredSize(new Dimension(250, 32));
         attackKnockback.setPreferredSize(new Dimension(250, 32));
         knockbackResistance.setPreferredSize(new Dimension(250, 32));
@@ -1201,6 +1220,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         health.setValue(livingEntity.health);
         trackingRange.setValue(livingEntity.trackingRange);
         followRange.setValue(livingEntity.followRange);
+        sprintToFollow.setSelected(livingEntity.sprintToFollow);
+        mimicTargetSprinting.setSelected(livingEntity.mimicTargetSprinting);
+        sprintingRange.setValue(livingEntity.sprintingRange);
+        stopSprintingRange.setValue(livingEntity.stopSprintingRange);
         immuneToFire.setSelected(livingEntity.immuneToFire);
         immuneToArrows.setSelected(livingEntity.immuneToArrows);
         immuneToFallDamage.setSelected(livingEntity.immuneToFallDamage);
@@ -1362,6 +1385,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.health = (int) health.getValue();
         livingEntity.trackingRange = (int) trackingRange.getValue();
         livingEntity.followRange = (int) followRange.getValue();
+        livingEntity.sprintToFollow = sprintToFollow.isSelected();
+        livingEntity.mimicTargetSprinting = mimicTargetSprinting.isSelected();
+        livingEntity.sprintingRange = (int) sprintingRange.getValue();
+        livingEntity.stopSprintingRange = (int) stopSprintingRange.getValue();
         livingEntity.immuneToFire = immuneToFire.isSelected();
         livingEntity.immuneToArrows = immuneToArrows.isSelected();
         livingEntity.immuneToFallDamage = immuneToFallDamage.isSelected();

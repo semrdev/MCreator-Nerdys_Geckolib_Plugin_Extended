@@ -20,7 +20,7 @@
  # 
  # As a special exception, you may create a larger work that contains part or 
  # all of the MCreator code generator templates (*.ftl files) and distribute 
- # that work under terms of your choice, so long as that work isn't itself a 
+ # that work under terms of your choice, so long as that work is not itself a 
  # template for code generation. Alternatively, if you modify or redistribute 
  # the template itself, you may (at your option) remove this special exception, 
  # which will cause the template and the resulting code generator output files 
@@ -85,7 +85,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	private boolean swinging;
 	private boolean lastloop;
 	private long lastSwing;
-        public String animationprocedure = "empty";
+	public String animationprocedure = "empty";
 	<#if data.isBoss>
 	private final ServerBossEvent bossInfo = new ServerBossEvent(this.getDisplayName(),
 		ServerBossEvent.BossBarColor.${data.bossBarColor}, ServerBossEvent.BossBarOverlay.${data.bossBarType});
@@ -169,6 +169,38 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 				}
 			}
 		};
+		<#else>
+		this.moveControl = new MoveControl(this) {
+			@Override public void tick() {
+			    ${name}Entity.this.updateSprintState(operation == MoveControl.Operation.WAIT);
+				super.tick();
+			}
+		};
+		</#if>
+	}
+
+	private int sprintFollowWindDownTicks = 2;
+	private int sprintFollowWindDownCounter = 0;
+
+	public void updateSprintState(boolean isWaiting) {
+
+		<#if data.sprintToFollow && data.tameable && data.breedable>
+		if (${name}Entity.this.isTame() && ${name}Entity.this.getOwner() != null) {
+			if (!${name}Entity.this.isSprinting()) {
+				if (<#if data.mimicTargetSprinting>${name}Entity.this.getOwner().isSprinting() || </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) >= ${data.sprintingRange}) {
+						${name}Entity.this.setSprinting(true);
+				}
+			} else if (${name}Entity.this.isSprinting()) {
+				if ((<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) 
+				     || isWaiting) {
+						sprintFollowWindDownCounter++;
+						if (sprintFollowWindDownCounter >= sprintFollowWindDownTicks) {
+							${name}Entity.this.setSprinting(false);
+							sprintFollowWindDownCounter = 0;
+						}
+				}
+			}
+		}
 		</#if>
 	}
 
@@ -893,9 +925,9 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         </#if>
         <#if data.flyingMob>
            this.setNoGravity(true);
-           </#if>
+		</#if>
         }
-        </#if>
+	</#if>
 
 	public static void init() {
 		<#if data.spawnThisMob>
@@ -1020,13 +1052,20 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		if ((event.isMoving() || !(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F))
 		<#if data.enable8>&& this.isOnGround()</#if> <#if data.enable9>&& !this.isVehicle()</#if>
 		<#if data.enable10>&& !this.isAggressive()</#if>) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation2}", EDefaultLoopTypes.LOOP));
+			<#if data.enable7>
+			if (this.isSprinting()) {
+				event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation7}", EDefaultLoopTypes.LOOP));
+			}
+			else {
+			</#if>
+				event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation2}", EDefaultLoopTypes.LOOP));
+			<#if data.enable7> } </#if>
 			return PlayState.CONTINUE;
 		}
 		</#if>
 		<#if data.enable3>
 		if (this.isDeadOrDying()) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation3}", 						EDefaultLoopTypes.PLAY_ONCE));
+			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation3}", EDefaultLoopTypes.PLAY_ONCE));
 			return PlayState.CONTINUE;
 		}
 		</#if>
@@ -1039,12 +1078,6 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		<#if data.enable6>
 		if (this.isShiftKeyDown()) {
 			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation6}", EDefaultLoopTypes.LOOP));
-			return PlayState.CONTINUE;
-		}
-		</#if>
-		<#if data.enable7>
-		if (this.isSprinting()) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation7}", EDefaultLoopTypes.LOOP));
 			return PlayState.CONTINUE;
 		}
 		</#if>
@@ -1062,7 +1095,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		</#if>
 		<#if data.enable10>
 		if (this.isAggressive() && event.isMoving()<#if data.enable9> && !this.isVehicle()</#if>) {
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation10}", 						EDefaultLoopTypes.LOOP));
+			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation10}", EDefaultLoopTypes.LOOP));
 			return PlayState.CONTINUE;
 		}
 		</#if>
@@ -1085,9 +1118,9 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			this.swinging = false;
 		}
 		if (<#if data.ranged>(</#if>this.swinging<#if data.ranged> || this.entityData.get(SHOOT))</#if>
-		&& event.getController().getAnimationState().equals(software.bernie.geckolib3.core.AnimationState.Stopped)) 					{
+		&& event.getController().getAnimationState().equals(software.bernie.geckolib3.core.AnimationState.Stopped)) {
 			event.getController().markNeedsReload();
-			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation4}", 							EDefaultLoopTypes.PLAY_ONCE));
+			event.getController().setAnimation(new AnimationBuilder().addAnimation("${data.animation4}", EDefaultLoopTypes.PLAY_ONCE));
 				return PlayState.CONTINUE;
 		}
 	return PlayState.CONTINUE;
