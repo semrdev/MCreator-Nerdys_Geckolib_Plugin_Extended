@@ -436,28 +436,28 @@ public class AnimatedArmorGUI extends ModElementGUI<AnimatedArmor> implements Ge
         pane5.add("Center", PanelUtils.totalCenterInPanel(clopa));
 
         textureHelmet.setValidator(() -> {
-            if (enableHelmet.isSelected() && !textureHelmet.hasTexture())
+            if (enableHelmet.isSelected() && !textureHelmet.has())
                 return new Validator.ValidationResult(Validator.ValidationResultType.ERROR,
                         L10N.t("elementgui.armor.need_texture"));
             return Validator.ValidationResult.PASSED;
         });
 
         textureBody.setValidator(() -> {
-            if (enableBody.isSelected() && !textureBody.hasTexture())
+            if (enableBody.isSelected() && !textureBody.has())
                 return new Validator.ValidationResult(Validator.ValidationResultType.ERROR,
                         L10N.t("elementgui.armor.need_texture"));
             return Validator.ValidationResult.PASSED;
         });
 
         textureLeggings.setValidator(() -> {
-            if (enableLeggings.isSelected() && !textureLeggings.hasTexture())
+            if (enableLeggings.isSelected() && !textureLeggings.has())
                 return new Validator.ValidationResult(Validator.ValidationResultType.ERROR,
                         L10N.t("elementgui.armor.need_texture"));
             return Validator.ValidationResult.PASSED;
         });
 
         textureBoots.setValidator(() -> {
-            if (enableBoots.isSelected() && !textureBoots.hasTexture())
+            if (enableBoots.isSelected() && !textureBoots.has())
                 return new Validator.ValidationResult(Validator.ValidationResultType.ERROR,
                         L10N.t("elementgui.armor.need_texture"));
             return Validator.ValidationResult.PASSED;
