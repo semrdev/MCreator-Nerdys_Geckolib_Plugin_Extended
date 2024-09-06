@@ -174,13 +174,15 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	public void updateSprintState(boolean isWaiting) {
 
 		<#if data.sprintToFollow && data.tameable && data.breedable>
+
+		boolean followingOwner = ${name}Entity.this.goalSelector.getRunningGoals().map(WrappedGoal::getGoal).anyMatch(goal -> goal instanceof FollowOwnerGoal);
 		if (${name}Entity.this.isTame() && ${name}Entity.this.getOwner() != null) {
-			if (!${name}Entity.this.isSprinting()) {
+			if (followingOwner && !${name}Entity.this.isSprinting() && !${name}Entity.this.isCrouching() && !${name}Entity.this.isShiftKeyDown()) {
 				if (<#if data.mimicTargetSprinting>${name}Entity.this.getOwner().isSprinting() || </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) >= ${data.sprintingRange}) {
 						${name}Entity.this.setSprinting(true);
 				}
 			} else if (${name}Entity.this.isSprinting()) {
-				if ((<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) &&  </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange}) 
+				if (!followingOwner || (<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) && </#if> ${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange})
 				     || isWaiting) {
 						sprintFollowWindDownCounter++;
 						if (sprintFollowWindDownCounter >= sprintFollowWindDownTicks) {
