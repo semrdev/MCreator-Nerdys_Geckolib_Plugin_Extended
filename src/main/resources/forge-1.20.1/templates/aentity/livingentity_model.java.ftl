@@ -17,7 +17,7 @@ public class ${name}Model extends GeoModel<${name}Entity> {
     public ResourceLocation getTextureResource(${name}Entity entity) {
         return new ResourceLocation("${modid}", "textures/entities/" + entity.getTexture() + ".png");
     }
-     
+
     <#if data.headMovement>
     @Override
     public void setCustomAnimations(${name}Entity animatable, long instanceId, AnimationState animationState) {
@@ -27,7 +27,19 @@ public class ${name}Model extends GeoModel<${name}Entity> {
 			head.setRotX(entityData.headPitch() * Mth.DEG_TO_RAD);
 			head.setRotY(entityData.netHeadYaw() * Mth.DEG_TO_RAD);
 		}
-	
+
+        // This is the processor for hiding any of the bones on the character.
+        if (animatable.hiddenBones != null) {
+            for (String boneName : animatable.hiddenBones) {
+                if (boneName != null) {
+                    Optional<GeoBone> boneToHide = this.getBone(boneName);
+                    if (boneToHide.isPresent()) {
+                        boneToHide.get().setHidden(true);
+                        boneToHide.get().setChildrenHidden(true);
+                    }
+                }
+            }
+        }
     }
     </#if>
 }

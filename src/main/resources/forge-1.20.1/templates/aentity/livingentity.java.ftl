@@ -29,10 +29,14 @@
 -->
 
 <#-- @formatter:off -->
+package ${package}.entity;
+
 <#include "../mcitems.ftl">
 <#include "../procedures.java.ftl">
 
-package ${package}.entity;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -43,6 +47,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 
 import javax.annotation.Nullable;
+import java.util.*;
 
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationState;
@@ -1150,6 +1155,22 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 
 	public void setAnimation(String animation) {
 		this.entityData.set(ANIMATION, animation);
+	}
+
+	public Set<String> hiddenBones;
+	public void toggleModelBones(String bones, Boolean visible) {
+		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+
+		if (hiddenBones == null) {
+			hiddenBones = new HashSet<String>();
+		}
+
+		if (visible) {
+			hiddenBones.removeAll(Arrays.asList(boneArray));
+		}
+		else {
+			hiddenBones.addAll(Arrays.asList(boneArray));
+		}
 	}
 
 	@Override
