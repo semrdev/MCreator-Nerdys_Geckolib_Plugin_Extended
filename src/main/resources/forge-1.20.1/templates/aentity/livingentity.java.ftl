@@ -34,10 +34,6 @@ package ${package}.entity;
 <#include "../mcitems.ftl">
 <#include "../procedures.java.ftl">
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.Tag;
@@ -1158,6 +1154,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	}
 
 	public Set<String> hiddenBones;
+	public Set<String> shownBones;
 	public void toggleModelBones(String bones, Boolean visible) {
 		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
 
@@ -1165,10 +1162,16 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			hiddenBones = new HashSet<String>();
 		}
 
+		if (shownBones == null) {
+			shownBones = new HashSet<String>();
+		}
+
 		if (visible) {
 			hiddenBones.removeAll(Arrays.asList(boneArray));
+			shownBones.addAll(Arrays.asList(boneArray));
 		}
 		else {
+			shownBones.removeAll(Arrays.asList(boneArray));
 			hiddenBones.addAll(Arrays.asList(boneArray));
 		}
 	}

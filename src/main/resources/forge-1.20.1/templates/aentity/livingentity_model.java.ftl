@@ -39,6 +39,21 @@ public class ${name}Model extends GeoModel<${name}Entity> {
                     }
                 }
             }
+            animatable.hiddenBones.clear();
+        }
+
+        // This is the processor for showing any of the bones on the character.
+        if (animatable.shownBones != null) {
+            for (String boneName : animatable.shownBones) {
+                if (boneName != null) {
+                    Optional<GeoBone> boneToShow = this.getBone(boneName);
+                    if (boneToShow.isPresent()) {
+                        boneToShow.get().setHidden(false);
+                        boneToShow.get().setChildrenHidden(false);
+                    }
+                }
+            }
+            animatable.shownBones.clear();
         }
     }
     </#if>
