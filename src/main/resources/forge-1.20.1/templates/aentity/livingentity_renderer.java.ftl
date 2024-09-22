@@ -34,6 +34,8 @@
 
 package ${package}.client.renderer;
 
+import net.minecraftforge.client.ForgeRenderTypes;
+
 <#assign shadowRadius = "this.shadowRadius = " + data.modelShadowSize + "f;">
 
 public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
@@ -47,7 +49,11 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
    @Override
    public RenderType getRenderType(${name}Entity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
-		return RenderType.entityTranslucent(getTextureLocation(animatable));
+      <#if data.renderType == "UNLIT_TRANSLUCENT">
+        return ForgeRenderTypes.getUnlitTranslucent(texture);
+      <#else>
+        return RenderType.entityTranslucent(texture);
+      </#if>
 	}
 
 	@Override

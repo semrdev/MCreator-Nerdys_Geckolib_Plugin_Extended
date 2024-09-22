@@ -43,6 +43,7 @@ public class AnimatedEntity extends GeneratableElement
     public String mobModelGlowTexture;
     public NumberProcedure visualScale;
     public NumberProcedure boundingBoxScale;
+    public String renderType;
     public Procedure solidBoundingBox;
     public List<PropertyDataWithValue<?>> entityDataEntries;
 

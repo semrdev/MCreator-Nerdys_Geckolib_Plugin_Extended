@@ -72,6 +72,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     public NumberProcedureSelector boundingBoxScale;
     private ProcedureSelector solidBoundingBox;
 
+    private final JComboBox<String> renderType = new JComboBox<>(
+            new String[] { "TRANSLUCENT", "UNLIT_TRANSLUCENT"});
+
     private final SoundSelector livingSound = new SoundSelector(mcreator);
     private final SoundSelector hurtSound = new SoundSelector(mcreator);
     private final SoundSelector deathSound = new SoundSelector(mcreator);
@@ -491,7 +494,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         entityDataListComp.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         entityDataListPanel.add(entityDataListComp);
 
-        JPanel spo2 = new JPanel(new GridLayout(15, 2, 2, 2));
+        JPanel spo2 = new JPanel(new GridLayout(16, 2, 2, 2));
 
         spo2.setOpaque(false);
 
@@ -537,6 +540,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("entity/glow_texture"),
                 L10N.label("elementgui.living_entity.glow_texture")));
         spo2.add(mobModelGlowTexture);
+
+        spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/render_type"),
+                L10N.label("elementgui.living_entity.render_type")));
+        spo2.add(renderType);
 
         ComponentUtils.deriveFont(mobModelTexture, 16);
         ComponentUtils.deriveFont(mobModelGlowTexture, 16);
@@ -1195,6 +1202,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         onMobTickUpdate.setSelectedProcedure(livingEntity.onMobTickUpdate);
         onPlayerCollidesWith.setSelectedProcedure(livingEntity.onPlayerCollidesWith);
         onInitialSpawn.setSelectedProcedure(livingEntity.onInitialSpawn);
+        renderType.setSelectedItem(livingEntity.renderType);
         mobBehaviourType.setSelectedItem(livingEntity.mobBehaviourType);
         mobCreatureType.setSelectedItem(livingEntity.mobCreatureType);
         attackStrength.setValue(livingEntity.attackStrength);
@@ -1376,6 +1384,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.equipmentBody = equipmentBody.getBlock();
         livingEntity.equipmentLeggings = equipmentLeggings.getBlock();
         livingEntity.equipmentBoots = equipmentBoots.getBlock();
+        livingEntity.renderType = (String) renderType.getSelectedItem();
         livingEntity.mobBehaviourType = (String) mobBehaviourType.getSelectedItem();
         livingEntity.mobCreatureType = (String) mobCreatureType.getSelectedItem();
         livingEntity.attackStrength = (int) attackStrength.getValue();
