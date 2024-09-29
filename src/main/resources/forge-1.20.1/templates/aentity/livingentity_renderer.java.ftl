@@ -73,7 +73,35 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
                 this.scaleHeight = scale;
                 this.scaleWidth = scale;
             </#if>
-                super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+
+        // This is the processor for hiding any of the bones on the character.
+        if (entity.hiddenBones != null) {
+            for (String boneName : entity.hiddenBones) {
+                if (boneName != null) {
+                    Optional<GeoBone> boneToHide = model.getBone(boneName);
+                    if (boneToHide.isPresent()) {
+                        boneToHide.get().setHidden(true);
+                        boneToHide.get().setChildrenHidden(true);
+                    }
+                }
+            }
+            entity.hiddenBones.clear();
+        }
+
+        // This is the processor for showing any of the bones on the character.
+        if (entity.shownBones != null) {
+            for (String boneName : entity.shownBones) {
+                if (boneName != null) {
+                    Optional<GeoBone> boneToShow = model.getBone(boneName);
+                    if (boneToShow.isPresent()) {
+                        boneToShow.get().setHidden(false);
+                        boneToShow.get().setChildrenHidden(false);
+                    }
+                }
+            }
+            entity.shownBones.clear();
+        }
+        super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
 <#if data.disableDeathRotation>
