@@ -21,7 +21,7 @@ dependencies {
 }
 
 tasks.jar {
-    archiveFileName.set("Nerdys_Geckolib_Plugin.zip")
+    archiveFileName.set("SMR_Geckolib_Plugin_06.zip")
 }
 
 tasks.register('runMCreatorWithPlugin', JavaExec) {
