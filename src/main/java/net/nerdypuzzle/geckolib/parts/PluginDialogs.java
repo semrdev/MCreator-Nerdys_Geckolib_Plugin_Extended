@@ -76,7 +76,7 @@ public class PluginDialogs {
                         geckoElement.equipmentBody = entity.equipmentBody;
                         geckoElement.equipmentLeggings = entity.equipmentLeggings;
                         geckoElement.equipmentBoots = entity.equipmentBoots;
-                        geckoElement.renderType = entity.renderType;
+                        geckoElement.renderType = "TRANSLUCENT";
                         geckoElement.mobBehaviourType = entity.mobBehaviourType;
                         geckoElement.mobCreatureType = entity.mobCreatureType;
                         geckoElement.attackStrength = entity.attackStrength;
@@ -229,7 +229,6 @@ public class PluginDialogs {
                         geckoElement.equipmentBody = entity.equipmentBody;
                         geckoElement.equipmentLeggings = entity.equipmentLeggings;
                         geckoElement.equipmentBoots = entity.equipmentBoots;
-                        geckoElement.renderType = entity.renderType;
                         geckoElement.mobBehaviourType = entity.mobBehaviourType;
                         geckoElement.mobCreatureType = entity.mobCreatureType;
                         geckoElement.attackStrength = entity.attackStrength;
