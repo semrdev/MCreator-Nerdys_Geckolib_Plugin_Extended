@@ -192,6 +192,7 @@ public class AnimatedEntity extends GeneratableElement
     public AnimatedEntity(ModElement element) {
         super(element);
 
+        this.renderType = "TRANSLUCENT";
         this.modelShadowSize = 0.5;
         this.mobCreatureType = "UNDEFINED";
         this.mobModelTexture = new String("");
