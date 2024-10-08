@@ -171,8 +171,42 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 				}
 			}
 		};
+		<#else>
+		this.moveControl = new MoveControl(this) {
+			@Override public void tick() {
+			    ${name}Entity.this.updateSprintState(operation == MoveControl.Operation.WAIT);
+				super.tick();
+			}
+		};
 		</#if>
 	}
+
+    private int sprintFollowWindDownTicks = 2;
+    private int sprintFollowWindDownCounter = 0;
+
+    public void updateSprintState(boolean isWaiting) {
+
+        <#if data.sprintToFollow && data.tameable && data.breedable>
+
+        boolean followingOwner = ${name}Entity.this.goalSelector.getRunningGoals().map(WrappedGoal::getGoal).anyMatch(goal -> goal instanceof FollowOwnerGoal);
+        if (${name}Entity.this.isTame() && ${name}Entity.this.getOwner() != null) {
+            if (followingOwner && !${name}Entity.this.isSprinting() && !${name}Entity.this.isCrouching() && !${name}Entity.this.isShiftKeyDown()) {
+                if (<#if data.mimicTargetSprinting>${name}Entity.this.getOwner().isSprinting() || </#if>${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) >= ${data.sprintingRange}) {
+                        ${name}Entity.this.setSprinting(true);
+                }
+            } else if (${name}Entity.this.isSprinting()) {
+                if (!followingOwner || (<#if data.mimicTargetSprinting>!(${name}Entity.this.getOwner().isSprinting()) && </#if> ${name}Entity.this.distanceTo(${name}Entity.this.getOwner()) <= ${data.stopSprintingRange})
+                     || isWaiting) {
+                        sprintFollowWindDownCounter++;
+                        if (sprintFollowWindDownCounter >= sprintFollowWindDownTicks) {
+                            ${name}Entity.this.setSprinting(false);
+                            sprintFollowWindDownCounter = 0;
+                        }
+                }
+            }
+        }
+        </#if>
+    }
 
 	@Override
 	protected void defineSynchedData() {
