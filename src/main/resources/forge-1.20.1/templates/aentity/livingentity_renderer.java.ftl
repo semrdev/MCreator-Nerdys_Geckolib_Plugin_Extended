@@ -49,7 +49,7 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
    @Override
    public RenderType getRenderType(${name}Entity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
-      <#if data.renderType == "UNLIT_TRANSLUCENT">
+      <#if data.renderType?? && data.renderType == "UNLIT_TRANSLUCENT">
         return ForgeRenderTypes.getUnlitTranslucent(texture);
       <#else>
         return RenderType.entityTranslucent(texture);
