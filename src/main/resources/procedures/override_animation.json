@@ -8,13 +8,13 @@
     },
     {
       "type": "input_value",
-      "name": "bone",
+      "name": "animType",
       "check": "String"
     },
     {
       "type": "input_value",
-      "name": "visible",
-      "check": "Boolean"
+      "name": "animOverride",
+      "check": "String"
     },
     {
       "type": "input_value",
@@ -29,16 +29,16 @@
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
-      "<value name=\"visible\"><block type=\"logic_boolean\"><field name=\"BOOL\">FALSE</field></block></value>",
+      "<value name=\"animType\"><block type=\"text\"><field name=\"TEXT\">IDLE</field></block></value>",
+      "<value name=\"animOverride\"><block type=\"text\"><field name=\"TEXT\">sit</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "fields": [
       "name"
     ],
     "inputs": [
-      "bone",
-      "visible",
+      "animType",
+      "animOverride",
       "entity"
     ]
   }

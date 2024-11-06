@@ -72,7 +72,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     public static final EntityDataAccessor<String> TEXTURE = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.STRING);
 
-	<#list data.entityDataEntries as entry>
+		<#list data.entityDataEntries as entry>
 		<#if entry.value().getClass().getSimpleName() == "Integer">
 			public static final EntityDataAccessor<Integer> DATA_${entry.property().getName()} = SynchedEntityData.defineId(${name}Entity.class, EntityDataSerializers.INT);
 		<#elseif entry.value().getClass().getSimpleName() == "Boolean">
@@ -1072,51 +1072,158 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		return builder;
 	}
 
+	private class OverridableAnimation {
+		private String animDefault = "";
+		private String anim = "";
+		private String previousAnim = "";
+
+		public OverridableAnimation(String defaultAnim) {
+			anim = previousAnim = animDefault = defaultAnim;
+		}
+
+		public String overrideAnim (String overrideAnim) {
+			String stagedAnim = resolveDefaultAnim(overrideAnim);
+			if (stagedAnim != anim) {
+				previousAnim = anim;
+				anim = stagedAnim;
+			}
+			return anim;
+		}
+
+		public String getAnim() {
+			return anim;
+		}
+
+		public boolean hasPreviousAnimation() {
+			return (previousAnim != anim);
+		}
+
+		public void clearPreviousAnimation() {
+			previousAnim = anim;
+		}
+
+
+		// Return to default animation if string is empty.
+		private String resolveDefaultAnim(String anim) {
+			if (anim == null || anim == "") {
+				return animDefault;
+			} else {
+				return anim;
+			}
+		}
+	}
+
+	private OverridableAnimation animation1 = new OverridableAnimation("${data.animation1}");
+	private OverridableAnimation animation2 = new OverridableAnimation("${data.animation2}");
+	private OverridableAnimation animation3 = new OverridableAnimation("${data.animation3}");
+	private OverridableAnimation animation4 = new OverridableAnimation("${data.animation4}");
+	private OverridableAnimation animation5 = new OverridableAnimation("${data.animation5}");
+	private OverridableAnimation animation6 = new OverridableAnimation("${data.animation6}");
+	private OverridableAnimation animation7 = new OverridableAnimation("${data.animation7}");
+	private OverridableAnimation animation8 = new OverridableAnimation("${data.animation8}");
+	private OverridableAnimation animation9 = new OverridableAnimation("${data.animation9}");
+	private OverridableAnimation animation10 = new OverridableAnimation("${data.animation10}");
+
+	public void overrideAnimation(String animationType, String animID) {
+		String animationTypeProcessed = animationType.toUpperCase().replace(" ", "").replace("_", "").replace("ANIMATION", "");
+		if ("1" == animationTypeProcessed ||
+			"IDLE" == animationTypeProcessed) {
+			this.animation1.overrideAnim(animID);
+		} else if ("2" == animationTypeProcessed ||
+			"WALK" == animationTypeProcessed ||
+			"WALKING" == animationTypeProcessed) {
+			this.animation2.overrideAnim(animID);
+		} else if ("3" == animationTypeProcessed ||
+			"DEATH" == animationTypeProcessed ||
+			"DIE" == animationTypeProcessed) {
+			this.animation3.overrideAnim(animID);
+		} else if ("4" == animationTypeProcessed ||
+			"ATTACK" == animationTypeProcessed ||
+			"ATTACKING" == animationTypeProcessed) {
+			this.animation4.overrideAnim(animID);
+		} else if ("5" == animationTypeProcessed ||
+			"SWIM" == animationTypeProcessed ||
+			"SWIMMING" == animationTypeProcessed) {
+			this.animation5.overrideAnim(animID);
+		} else if ("6" == animationTypeProcessed ||
+			"SNEAK" == animationTypeProcessed ||
+			"SNEAKING" == animationTypeProcessed) {
+			this.animation6.overrideAnim(animID);
+		} else if ("7" == animationTypeProcessed ||
+			"SPRINT" == animationTypeProcessed ||
+			"SPRINTING" == animationTypeProcessed) {
+			this.animation7.overrideAnim(animID);
+		} else if ("8" == animationTypeProcessed ||
+			"FLIGHT" == animationTypeProcessed ||
+			"FLY" == animationTypeProcessed ||
+			"FLYING" == animationTypeProcessed) {
+			this.animation8.overrideAnim(animID);
+		} else if ("9" == animationTypeProcessed ||
+			"RIDE" == animationTypeProcessed ||
+			"RIDING" == animationTypeProcessed) {
+			this.animation9.overrideAnim(animID);
+		} else if ("10" == animationTypeProcessed ||
+			"AGGRESSION" == animationTypeProcessed ||
+			"AGGRESSIVE" == animationTypeProcessed) {
+			this.animation10.overrideAnim(animID);
+		}
+	}
+
+	private PlayState getAnimAndResetIfNeeded(OverridableAnimation anim, AnimationState event) {
+		PlayState returnAnim = event.setAndContinue(RawAnimation.begin().thenLoop(anim.getAnim()));
+
+		if (anim.hasPreviousAnimation()) {
+			event.getController().forceAnimationReset();
+			anim.clearPreviousAnimation();
+		}
+		return returnAnim;
+	}
+
 	private PlayState movementPredicate(AnimationState event) {
 	      if (this.animationprocedure.equals("empty")) {
 		<#if data.enable2>
 		if ((event.isMoving() || !(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F))
 		<#if data.enable8>&& this.onGround()</#if> <#if data.enable9>&& !this.isVehicle()</#if>
 		<#if data.enable10>&& !this.isAggressive()</#if> <#if data.enable7>&& !this.isSprinting()</#if>) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation2}"));
+			return this.getAnimAndResetIfNeeded(animation2, event);
 		}
 		</#if>
 		<#if data.enable3>
 		if (this.isDeadOrDying()) {
-			return event.setAndContinue(RawAnimation.begin().thenPlay("${data.animation3}"));
+			return this.getAnimAndResetIfNeeded(animation3, event);
 		}
 		</#if>
 		<#if data.enable5>
 		if (this.isInWaterOrBubble()) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation5}"));
+			return this.getAnimAndResetIfNeeded(animation5, event);
 		}
 		</#if>
 		<#if data.enable6>
 		if (this.isShiftKeyDown()) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation6}"));
+			return this.getAnimAndResetIfNeeded(animation6, event);
 		}
 		</#if>
 		<#if data.enable7>
 		if (this.isSprinting()) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation7}"));
+			return this.getAnimAndResetIfNeeded(animation7, event);
 		}
 		</#if>
 		<#if data.enable8>
 		if (!this.onGround()) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation8}"));
+			return this.getAnimAndResetIfNeeded(animation8, event);
 		}
 		</#if>
 		<#if data.enable9>
 		if (this.isVehicle() && event.isMoving()) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation9}"));
+			return this.getAnimAndResetIfNeeded(animation9, event);
 		}
 		</#if>
 		<#if data.enable10>
 		if (this.isAggressive() && event.isMoving()<#if data.enable9> && !this.isVehicle()</#if>) {
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation10}"));
+		  	return this.getAnimAndResetIfNeeded(animation10, event);
 		}
 		</#if>
-			return event.setAndContinue(RawAnimation.begin().thenLoop("${data.animation1}"));
+		  	return this.getAnimAndResetIfNeeded(animation1, event);
 	}
         return PlayState.STOP;
 	}
@@ -1136,7 +1243,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		if (<#if data.ranged>(</#if>this.swinging<#if data.ranged> || this.entityData.get(SHOOT))</#if>
 		&& event.getController().getAnimationState() == AnimationController.State.STOPPED) {
 			event.getController().forceAnimationReset();
-			return event.setAndContinue(RawAnimation.begin().thenPlay("${data.animation4}"));
+			return event.setAndContinue(RawAnimation.begin().thenPlay(this.animation4.getAnim()));
 		}
 	return PlayState.CONTINUE;
    	}
