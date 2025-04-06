@@ -1,5 +1,8 @@
 package net.nerdypuzzle.geckolib.element.types;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.blockly.java.BlocklyToJava;
 import net.mcreator.element.BaseType;
@@ -7,6 +10,7 @@ import net.mcreator.element.GeneratableElement;
 import net.mcreator.element.parts.*;
 import net.mcreator.element.parts.procedure.NumberProcedure;
 import net.mcreator.element.parts.procedure.Procedure;
+import net.mcreator.element.parts.procedure.RetvalProcedure;
 import net.mcreator.element.types.interfaces.ICommonType;
 import net.mcreator.element.types.interfaces.IEntityWithModel;
 import net.mcreator.element.types.interfaces.IMCItemProvider;
@@ -23,13 +27,20 @@ import net.mcreator.util.FilenameUtilsPatched;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.resources.Model;
 import net.mcreator.workspace.resources.Texture;
+import net.nerdypuzzle.geckolib.parts.PluginDataActions;
 import net.nerdypuzzle.geckolib.registry.PluginElementTypes;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+
+import static net.mcreator.io.writer.JSONWriter.gson;
 
 @SuppressWarnings("unused")
 public class AnimatedEntity extends GeneratableElement
@@ -45,6 +56,8 @@ public class AnimatedEntity extends GeneratableElement
     public NumberProcedure boundingBoxScale;
     public String renderType;
     public Procedure solidBoundingBox;
+    public String dataGroupPath;
+    public AEntityDataGroup dataGroup;
     public List<PropertyDataWithValue<?>> entityDataEntries;
 
     public double modelWidth, modelHeight, modelShadowSize;
@@ -189,6 +202,8 @@ public class AnimatedEntity extends GeneratableElement
     public List<BiomeEntry> restrictionBiomes;
     public boolean spawnInDungeons;
 
+    private final Gson gson;
+
     private AnimatedEntity() {
         this(null);
     }
@@ -219,6 +234,13 @@ public class AnimatedEntity extends GeneratableElement
         this.raidSpawnsCount = new int[] {4, 3, 3, 4, 4, 4, 2};
 
         this.creativeTabs = new ArrayList<>();
+
+        GsonBuilder gsonBuilder = new GsonBuilder().registerTypeHierarchyAdapter(GeneratableElement.class,
+                        new GeneratableElement.GSONAdapter(this.getModElement().getWorkspace())).disableHtmlEscaping().setPrettyPrinting()
+                .setStrictness(Strictness.LENIENT);
+        RetvalProcedure.GSON_ADAPTERS.forEach(gsonBuilder::registerTypeAdapter);
+
+        this.gson = gsonBuilder.create();
     }
 
     @Override
@@ -289,4 +311,29 @@ public class AnimatedEntity extends GeneratableElement
         };
     }
 
+    public AEntityDataGroup getEntityDataGroup () {
+        AEntityDataGroup retVal = null;
+
+        if (this.dataGroupPath != null && !this.dataGroupPath.isEmpty()) {
+
+            ModElement dataGroupModElement = getModElement().getWorkspace().getModElementByName(this.dataGroupPath);
+            retVal = new AEntityDataGroup(dataGroupModElement);
+            return retVal;
+
+//            try {
+//                File elementsFolder = new File(this.getModElement().getWorkspace().getWorkspaceFolder(), "elements/");
+//                String fullPath = elementsFolder.getPath() + "/" + this.dataGroupPath;
+//                String jsonString = Files.readString(Paths.get(fullPath));
+//                retVal = this.gson.fromJson(jsonString, AEntityDataGroup.class);
+//
+//            } catch (IOException ignored) {
+//            }
+        }
+
+        return retVal;
+    }
+
+    public static String getDataGroupName (String path) {
+        return path.replace("mod.json", "");
+    }
 }

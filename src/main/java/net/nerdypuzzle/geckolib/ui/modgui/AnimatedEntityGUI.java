@@ -42,6 +42,7 @@ import net.mcreator.workspace.elements.VariableTypeLoader;
 import net.nerdypuzzle.geckolib.element.types.AnimatedEntity;
 import net.nerdypuzzle.geckolib.element.types.GeckolibElement;
 import net.nerdypuzzle.geckolib.parts.GeomodelRenderer;
+import net.nerdypuzzle.geckolib.parts.PluginDataActions;
 import net.nerdypuzzle.geckolib.parts.PluginModelActions;
 import net.nerdypuzzle.geckolib.parts.WTextureComboBoxRenderer;
 import net.nerdypuzzle.geckolib.registry.PluginElementTypes;
@@ -248,6 +249,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
     private final JTextField groupName = new JTextField();
 
+//    private final VComboBox<AEntityDataGroup> dataGroup;
+    private final VComboBox<String> dataGroup;
+
     private final VComboBox<String> geoModel;
 
     private final List<?> unmodifiableAIBases = (List<?>) mcreator.getWorkspace().getGenerator()
@@ -256,6 +260,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
     public AnimatedEntityGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {
         super(mcreator, modElement, editingMode);
+        this.dataGroup = new SearchableComboBox();
         this.geoModel = new SearchableComboBox();
         this.initGUI();
         super.finalizeGUI();
@@ -507,6 +512,12 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
                         L10N.label("elementgui.living_entity.entity_data")), entityDataList);
         entityDataListPanel.setOpaque(false);
         entityDataListComp.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+
+        entityDataListPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("entity/aentitydatagroup"),
+                L10N.label("elementgui.animatedentity.dataGroups")));
+        ComponentUtils.deriveFont(this.dataGroup, 16.0F);
+        entityDataListPanel.add(this.dataGroup);
         entityDataListPanel.add(entityDataListComp);
 
         JPanel spo2 = new JPanel(new GridLayout(16, 2, 2, 2));
@@ -1149,6 +1160,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
         disableMobModelCheckBoxListener = false;
 
+        ComboBoxUtil.updateComboBoxContents(this.dataGroup, ListUtils.merge(Collections.singleton(""), (Collection) PluginDataActions.getEntityDataGroups(this.mcreator).stream().map(File::getName).filter((s) -> {
+            return s.endsWith(".mod.json");
+        }).collect(Collectors.toList())));
+
         ComboBoxUtil.updateComboBoxContents(this.geoModel, ListUtils.merge(Collections.singleton(""), (Collection)PluginModelActions.getGeomodels(this.mcreator).stream().map(File::getName).filter((s) -> {
             return s.endsWith(".geo.json");
         }).collect(Collectors.toList())), "");
@@ -1171,6 +1186,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
     @Override public void openInEditingMode(AnimatedEntity livingEntity) {
         disableMobModelCheckBoxListener = true;
+        this.dataGroup.setSelectedItem(livingEntity.dataGroupPath);
         this.geoModel.setSelectedItem(livingEntity.model);
         disableDeathRotation.setSelected(livingEntity.disableDeathRotation);
         deathTime.setValue(livingEntity.deathTime);
@@ -1356,6 +1372,8 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     @Override public AnimatedEntity getElementFromGUI() {
         AnimatedEntity livingEntity = new AnimatedEntity(modElement);
         livingEntity.model = (String)this.geoModel.getSelectedItem();
+        livingEntity.dataGroupPath = (String)this.dataGroup.getSelectedItem();
+        livingEntity.dataGroup = livingEntity.getEntityDataGroup();
         livingEntity.disableDeathRotation = disableDeathRotation.isSelected();
         livingEntity.deathTime = (int) deathTime.getValue();
         //animation stuff

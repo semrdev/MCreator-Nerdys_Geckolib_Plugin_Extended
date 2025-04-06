@@ -47,6 +47,7 @@ import java.util.*;
 
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationState;
+import net.nerdypuzzle.geckolib.element.types.AnimatedEntity;
 
 <#assign extendsClass = "PathfinderMob">
 
@@ -64,7 +65,7 @@ import software.bernie.geckolib.core.animation.AnimationState;
 	<#assign extendsClass = "TamableAnimal">
 </#if>
 
-public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity</#if><#if !data.ranged>implements GeoEntity</#if> {
+public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity<#else>implements GeoEntity</#if> {
     public static final EntityDataAccessor<Boolean> SHOOT = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(
