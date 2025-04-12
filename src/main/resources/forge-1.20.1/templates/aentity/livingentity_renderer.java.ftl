@@ -35,10 +35,14 @@
 package ${package}.client.renderer;
 
 import net.minecraftforge.client.ForgeRenderTypes;
+import java.util.*;
 
 <#assign shadowRadius = "this.shadowRadius = " + data.modelShadowSize + "f;">
 
 public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
+
+  public static Set<GeoBone> HIDDEN_BONE_CACHE;
+
   public ${name}Renderer(EntityRendererProvider.Context renderManager) {
      super(renderManager, new ${name}Model());
      ${shadowRadius}
@@ -76,31 +80,31 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
         // This is the processor for hiding any of the bones on the character.
         if (entity.hiddenBones != null) {
+
+            if (HIDDEN_BONE_CACHE == null) {
+                HIDDEN_BONE_CACHE = new HashSet<GeoBone>();
+            }
+            else {
+                for (GeoBone bone : HIDDEN_BONE_CACHE) {
+                    if (bone != null) {
+                        bone.setHidden(false);
+                        bone.setChildrenHidden(false);
+                    }
+                }
+            }
+
             for (String boneName : entity.hiddenBones) {
                 if (boneName != null) {
                     Optional<GeoBone> boneToHide = model.getBone(boneName);
                     if (boneToHide.isPresent()) {
                         boneToHide.get().setHidden(true);
                         boneToHide.get().setChildrenHidden(true);
+                        HIDDEN_BONE_CACHE.add(boneToHide.get());
                     }
                 }
             }
-            entity.hiddenBones.clear();
         }
 
-        // This is the processor for showing any of the bones on the character.
-        if (entity.shownBones != null) {
-            for (String boneName : entity.shownBones) {
-                if (boneName != null) {
-                    Optional<GeoBone> boneToShow = model.getBone(boneName);
-                    if (boneToShow.isPresent()) {
-                        boneToShow.get().setHidden(false);
-                        boneToShow.get().setChildrenHidden(false);
-                    }
-                }
-            }
-            entity.shownBones.clear();
-        }
         super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
