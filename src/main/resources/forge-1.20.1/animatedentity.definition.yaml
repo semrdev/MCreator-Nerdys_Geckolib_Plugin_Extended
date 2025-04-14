@@ -1,6 +1,8 @@
 global_templates:
   - template: aentity/animation_sync_factory.java.ftl
     name: "@SRCROOT/@BASEPACKAGEPATH/init/EntityAnimationFactory.java"
+  - template: aentity/offsetvertexconsumer.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/client/renderer/utils/OffsetVertexConsumer.java"
 
 templates:
   - template: aentity/livingentity.java.ftl

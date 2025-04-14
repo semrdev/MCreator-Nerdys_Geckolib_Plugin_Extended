@@ -43,6 +43,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.*;
 
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -1307,6 +1308,29 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		}
 		else {
 			hiddenBones.addAll(Arrays.asList(boneArray));
+		}
+	}
+
+	// A custom record for storing the bone UV offsets inside a hash map.
+	public record BoneUVOffset(float uOffset, float vOffset) {}
+
+	// A hash map for storing any bone UV offset customizations, with the bone names as the access keys.
+	// Accessed by the entity's renderer class while rendering the bones of the model.
+	public final Map<String, BoneUVOffset> boneUVOffsets = new HashMap<>();
+
+	// Function that is called by procedure blocks to add or remove bone UV offsets.
+	// If uOffset and vOffset are both 0, the bone is removed from the hash map to save processing cycles in the renderer.
+	public void offsetBoneUVs(String bones, float uOffset, float vOffset) {
+		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+
+		Boolean removeFromHashMap = (uOffset == 0 && vOffset == 0);
+
+		for (String boneName : boneArray) {
+			if (boneUVOffsets.containsKey(boneName) && removeFromHashMap) {
+				boneUVOffsets.remove(boneName);
+			} else if (!removeFromHashMap) {
+				boneUVOffsets.put(boneName, new BoneUVOffset(uOffset, vOffset));
+			}
 		}
 	}
 

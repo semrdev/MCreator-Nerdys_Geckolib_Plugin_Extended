@@ -34,6 +34,8 @@
 
 package ${package}.client.renderer;
 
+import ${package}.client.renderer.utils.OffsetVertexConsumer;
+
 import net.minecraftforge.client.ForgeRenderTypes;
 import java.util.*;
 
@@ -107,6 +109,27 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
         super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
+
+    private OffsetVertexConsumer cachedOffsetVertexConsumer = new OffsetVertexConsumer();
+    private ${name}Entity.BoneUVOffset uvOffset;
+
+    @Override
+    public void renderRecursively(PoseStack poseStack, ${name}Entity entity, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
+                                  VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
+                                  int packedOverlay, float red, float green, float blue, float alpha) {
+
+        this.uvOffset = null;
+        if (entity.boneUVOffsets != null && entity.boneUVOffsets.containsKey(bone.getName())) {
+            this.uvOffset = entity.boneUVOffsets.get(bone.getName());
+        }
+
+        if (this.uvOffset != null) {
+            this.cachedOffsetVertexConsumer.setup(buffer, this.uvOffset.uOffset(), this.uvOffset.vOffset());
+            super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.cachedOffsetVertexConsumer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        } else {
+            super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        }
+    }
 
 <#if data.disableDeathRotation>
  @Override
