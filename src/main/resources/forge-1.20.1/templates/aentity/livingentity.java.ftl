@@ -1334,6 +1334,97 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		}
 	}
 
+	private boolean overridePassengerOffset = false;
+	public String passengerBoneName = "";
+    private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
+
+	// Functions for changing the passenger ride attachment point.
+	// This is useful for entities with a seat in a specific location,
+	// or even something where the seat moves as the entity animations
+	// (like a wavy flying eastern style dragon).
+	public void setPassengerOffset(double x, double y, double z, String boneName) {
+        this.overridePassengerOffset = true;
+
+        this.passengerOffsetX = x;
+        this.passengerOffsetY = y;
+        this.passengerOffsetZ = z;
+
+        this.passengerBoneName = boneName;
+	}
+
+	public void resetPassengerOffset() {
+        this.overridePassengerOffset = false;
+        this.passengerBoneName = "";
+    }
+
+    private EntityRenderer<?> cachedEntityRenderer;
+    private ${name}Renderer cached${name}Renderer;
+    private GeoBone cachedPassengerBone;
+    private GeoModel<?> cachedGeoModel;
+    private Vector3d cachedBoneWorldPosVector3d;
+    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
+    private Vec3 cachedPassengerOffset = new Vec3(0.0D, 0.0D, 0.0D);
+    private Vec3 cachedPassengerPosition = new Vec3(0.0D, 0.0D, 0.0D);
+
+    private Vec3 calculatePassengerPosition() {
+        this.cachedPassengerOffset = new Vec3(this.passengerOffsetX, this.passengerOffsetY, passengerOffsetZ);
+        this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
+
+        if (level().isClientSide) {
+            this.cachedEntityRenderer = Minecraft.getInstance()
+                                                 .getEntityRenderDispatcher()
+                                                 .getRenderer(this);
+
+            if (this.cachedEntityRenderer instanceof ${name}Renderer cached${name}Renderer) {
+
+                this.cached${name}Renderer = cached${name}Renderer;
+
+                // Access the GeckoLib model bone
+                this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
+                if (this.cachedGeoModel != null) {
+                    this.cachedPassengerBone = this.cachedGeoModel.getBone(this.passengerBoneName).orElse(null);
+                    if (this.cachedPassengerBone != null) {
+                        this.cachedBoneWorldPosVector3d = this.cachedPassengerBone.getWorldPosition();
+                        this.cachedBoneWorldPosVec3 = new Vec3(this.cachedBoneWorldPosVector3d.x(), this.cachedBoneWorldPosVector3d.y(), this.cachedBoneWorldPosVector3d.z());
+
+                        this.cachedPassengerPosition = this.cachedBoneWorldPosVec3.add(this.cachedPassengerOffset);
+                        return this.cachedPassengerPosition;
+                    }
+                }
+            }
+        }
+        this.cachedPassengerPosition = this.position().add(this.cachedPassengerOffset);
+        return this.cachedPassengerPosition;
+    }
+
+    @Override
+    protected void positionRider(Entity passenger, Entity.MoveFunction moveFn) {
+        if (this.overridePassengerOffset) {
+            if (level().isClientSide) {
+                calculatePassengerPosition();
+                moveFn.accept(passenger, this.cachedPassengerPosition.x(), this.cachedPassengerPosition.y(), this.cachedPassengerPosition.z());
+            } else {
+                calculatePassengerPosition();
+                moveFn.accept(passenger, this.cachedPassengerPosition.x(), this.cachedPassengerPosition.y(), this.cachedPassengerPosition.z());
+            }
+        } else {
+            super.positionRider(passenger, moveFn);
+        }
+    }
+
+    @Override
+    public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
+        if (this.overridePassengerOffset) {
+            if (level().isClientSide) {
+                return calculatePassengerPosition();
+            } else {
+                return calculatePassengerPosition();
+            }
+        } else {
+            return super.getDismountLocationForPassenger(passenger);
+        }
+    }
+
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar data) {
 		data.add(new AnimationController<>(this, "movement", ${data.lerp}, this::movementPredicate));
