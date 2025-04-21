@@ -1336,7 +1336,9 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 
 	private boolean overridePassengerOffset = false;
 	public String passengerBoneName = "";
-    private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
+    private double passengerOffsetX = 0.0D;
+    private double passengerOffsetY = 0.0D;
+    private double passengerOffsetZ = 0.0D;
 
 	// Functions for changing the passenger ride attachment point.
 	// This is useful for entities with a seat in a specific location,
