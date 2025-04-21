@@ -1425,6 +1425,16 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         }
     }
 
+    private boolean isSitting = true;
+    public void setPassengerIsSitting(boolean isSitting) {
+        this.isSitting = isSitting;
+    }
+
+    @Override
+    public boolean shouldRiderSit() {
+        return this.isSitting;
+    }
+
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar data) {
 		data.add(new AnimationController<>(this, "movement", ${data.lerp}, this::movementPredicate));
