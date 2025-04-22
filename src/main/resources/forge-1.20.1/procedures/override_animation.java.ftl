@@ -1,3 +1,3 @@
-if (${input$entity} instanceof ${(field$name)?replace("CUSTOM:", "")}Entity) {
-    ((${(field$name)?replace("CUSTOM:", "")}Entity) ${input$entity}).overrideAnimation(${input$animType}, ${input$animOverride});
+if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
+    geckoLibEntity.overrideAnimation(${input$animType}, ${input$animOverride});
 }

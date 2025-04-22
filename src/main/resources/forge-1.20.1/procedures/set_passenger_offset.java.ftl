@@ -1,3 +1,3 @@
-if (${input$entity} instanceof ${(field$name)?replace("CUSTOM:", "")}Entity) {
-    ((${(field$name)?replace("CUSTOM:", "")}Entity) ${input$entity}).setPassengerOffset(${input$x}, ${input$y}, ${input$z}, ${input$bone});
+if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
+geckoLibEntity.setPassengerOffset(${input$x}, ${input$y}, ${input$z}, ${input$bone});
 }

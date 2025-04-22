@@ -1,12 +1,6 @@
 {
   "args0": [
     {
-      "type": "field_data_list_selector",
-      "name": "name",
-      "datalist": "animatedentity",
-      "customEntryProviders": "animatedentity"
-    },
-    {
       "type": "input_value",
       "name": "bone",
       "check": "String"
@@ -32,9 +26,6 @@
       "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
       "<value name=\"visible\"><block type=\"logic_boolean\"><field name=\"BOOL\">FALSE</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
-    ],
-    "fields": [
-      "name"
     ],
     "inputs": [
       "bone",

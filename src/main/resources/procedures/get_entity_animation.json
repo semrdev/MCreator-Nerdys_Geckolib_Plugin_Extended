@@ -1,12 +1,6 @@
 {
  "args0": [
     {
-     "type": "field_data_list_selector",
-     "name": "entityname",
-	 "datalist": "animatedentity",
-	 "customEntryProviders": "animatedentity"
-    },
-    {
      "type": "input_value",
      "name": "entity",
      "check": "Entity"
@@ -22,9 +16,6 @@
 ],
   "inputs": [
     "entity"
-   ],
-  "fields": [
-    "entityname"
    ]
   }
 }

@@ -1,3 +1,3 @@
-if (${input$entity} instanceof ${(field$name)?replace("CUSTOM:", "")}Entity) {
-    ((${(field$name)?replace("CUSTOM:", "")}Entity) ${input$entity}).setPassengerIsSitting(${input$isSitting});
+if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
+geckoLibEntity.setPassengerIsSitting(${input$isSitting});
 }

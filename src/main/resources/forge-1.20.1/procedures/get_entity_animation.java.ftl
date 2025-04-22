@@ -1,1 +1,1 @@
-((${(field$entityname)?replace("CUSTOM:", "")}Entity) ${input$entity}).animationprocedure
+(${input$entity} instanceof IGeckoLibEntity geckoLibEntity ? geckoLibEntity.getProcedureAnimation() : "null")

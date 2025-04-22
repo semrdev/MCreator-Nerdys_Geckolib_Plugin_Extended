@@ -1,3 +1,3 @@
-if (${input$entity} instanceof ${(field$name)?replace("CUSTOM:", "")}Entity) {
-((${(field$name)?replace("CUSTOM:", "")}Entity) ${input$entity}).setAnimation("empty");
+if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
+geckoLibEntity.setAnimation("empty");
 }

@@ -1,4 +1,6 @@
 global_templates:
+  - template: aentity/geckolibentity.java.ftl
+    name: "@SRCROOT/@BASEPACKAGEPATH/entity/IGeckoLibEntity.java"
   - template: aentity/animation_sync_factory.java.ftl
     name: "@SRCROOT/@BASEPACKAGEPATH/init/EntityAnimationFactory.java"
   - template: aentity/offsetvertexconsumer.java.ftl

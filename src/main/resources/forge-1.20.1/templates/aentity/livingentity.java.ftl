@@ -65,7 +65,7 @@ import software.bernie.geckolib.core.animation.AnimationState;
 	<#assign extendsClass = "TamableAnimal">
 </#if>
 
-public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity</#if><#if !data.ranged>implements GeoEntity</#if> {
+public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity, IGeckoLibEntity</#if><#if !data.ranged>implements GeoEntity, IGeckoLibEntity</#if> {
     public static final EntityDataAccessor<Boolean> SHOOT = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(
@@ -87,7 +87,11 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	private boolean swinging;
 	private boolean lastloop;
 	private long lastSwing;
-        public String animationprocedure = "empty";
+    public String animationprocedure = "empty";
+	@Override
+	public String getProcedureAnimation() {
+	    return this.animationprocedure;
+	}
 	<#if data.isBoss>
 	private final ServerBossEvent bossInfo = new ServerBossEvent(this.getDisplayName(),
 		ServerBossEvent.BossBarColor.${data.bossBarColor}, ServerBossEvent.BossBarOverlay.${data.bossBarType});
@@ -222,10 +226,12 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		</#if>
 	}
 
+    @Override
 	public void setTexture(String texture) {
 		this.entityData.set(TEXTURE, texture);
 	}
 
+    @Override
 	public String getTexture() {
 		return this.entityData.get(TEXTURE);
 	}
@@ -1125,6 +1131,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	private OverridableAnimation animation9 = new OverridableAnimation("${data.animation9}");
 	private OverridableAnimation animation10 = new OverridableAnimation("${data.animation10}");
 
+    @Override
 	public void overrideAnimation(String animationType, String animID) {
 		String animationTypeProcessed = animationType.toUpperCase().replace(" ", "").replace("_", "").replace("ANIMATION", "");
 		if ("1" == animationTypeProcessed ||
@@ -1291,6 +1298,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		return this.entityData.get(ANIMATION);
 	}
 
+    @Override
 	public void setAnimation(String animation) {
 		this.entityData.set(ANIMATION, animation);
 	}
@@ -1320,6 +1328,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 
 	// Function that is called by procedure blocks to add or remove bone UV offsets.
 	// If uOffset and vOffset are both 0, the bone is removed from the hash map to save processing cycles in the renderer.
+	@Override
 	public void offsetBoneUVs(String bones, float uOffset, float vOffset) {
 		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
 
@@ -1336,14 +1345,13 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 
 	private boolean overridePassengerOffset = false;
 	public String passengerBoneName = "";
-    private double passengerOffsetX = 0.0D;
-    private double passengerOffsetY = 0.0D;
-    private double passengerOffsetZ = 0.0D;
+    private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
 
 	// Functions for changing the passenger ride attachment point.
 	// This is useful for entities with a seat in a specific location,
 	// or even something where the seat moves as the entity animations
 	// (like a wavy flying eastern style dragon).
+	@Override
 	public void setPassengerOffset(double x, double y, double z, String boneName) {
         this.overridePassengerOffset = true;
 
@@ -1354,6 +1362,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         this.passengerBoneName = boneName;
 	}
 
+    @Override
 	public void resetPassengerOffset() {
         this.overridePassengerOffset = false;
         this.passengerBoneName = "";
@@ -1428,6 +1437,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     }
 
     private boolean isSitting = true;
+    @Override
     public void setPassengerIsSitting(boolean isSitting) {
         this.isSitting = isSitting;
     }
