@@ -36,6 +36,8 @@ package ${package}.client.renderer;
 
 import ${package}.client.renderer.utils.OffsetVertexConsumer;
 
+import com.mojang.math.Axis;
+
 import net.minecraftforge.client.ForgeRenderTypes;
 import java.util.*;
 
@@ -45,11 +47,79 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
   public static Set<GeoBone> HIDDEN_BONE_CACHE;
 
+  <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
+  private static final String RIGHT_HAND = "${data.mainHandItemBone}";
+  private static final String LEFT_HAND = "${data.offHandItemBone}";
+  protected ItemStack mainHandItem;
+  protected ItemStack offhandItem;
+  </#if>
+
   public ${name}Renderer(EntityRendererProvider.Context renderManager) {
      super(renderManager, new ${name}Model());
      ${shadowRadius}
      <#if data.mobModelGlowTexture?has_content>
      this.addRenderLayer(new ${name}Layer(this));
+     </#if>
+     <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
+     // Add held item rendering
+        addRenderLayer(new BlockAndItemGeoLayer<>(this) {
+            private float heldItemScale = 1.0f;
+
+            @Nullable
+            @Override
+            protected ItemStack getStackForBone(GeoBone bone, ${name}Entity entity) {
+                // Retrieve the items in the entity's hands for the relevant bone
+                return switch (bone.getName()) {
+                    case LEFT_HAND -> entity.isLeftHanded() ?
+                            ${name}Renderer.this.mainHandItem : ${name}Renderer.this.offhandItem;
+                    case RIGHT_HAND -> entity.isLeftHanded() ?
+                            ${name}Renderer.this.offhandItem : ${name}Renderer.this.mainHandItem;
+                    default -> null;
+                };
+            }
+
+            @Override
+            protected ItemDisplayContext getTransformTypeForStack(GeoBone bone, ItemStack stack, ${name}Entity entity) {
+                // Apply the camera transform for the given hand
+                return switch (bone.getName()) {
+                    case LEFT_HAND, RIGHT_HAND -> ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
+                    default -> ItemDisplayContext.NONE;
+                };
+            }
+
+            // Do some quick render modifications depending on what the item is
+            @Override
+            protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, ${name}Entity entity,
+                                              MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
+                if (stack == ${name}Renderer.this.mainHandItem) {
+                    poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
+
+                    if (stack.getItem() instanceof ShieldItem)
+                        poseStack.translate(0, 0.125, -0.25);
+                }
+                else if (stack == ${name}Renderer.this.offhandItem) {
+                    poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
+
+                    if (stack.getItem() instanceof ShieldItem) {
+                        poseStack.translate(0, 0.125, 0.25);
+                        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+                    }
+                }
+
+                <#if hasProcedure(data.heldItemScale)>
+                        Level world = entity.level();
+                        double x = entity.getX();
+                        double y = entity.getY();
+                        double z = entity.getZ();
+                        heldItemScale = (float) <@procedureOBJToNumberCode data.heldItemScale/>;
+                <#else>
+                        heldItemScale = ${data.heldItemScale.getFixedValue()}f;
+                </#if>
+                poseStack.scale(heldItemScale, heldItemScale, heldItemScale);
+
+                super.renderStackForBone(poseStack, bone, stack, entity, bufferSource, partialTick, packedLight, packedOverlay);
+            }
+        });
      </#if>
   }
 
@@ -65,6 +135,10 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 	@Override
 	public void preRender(PoseStack poseStack, ${name}Entity entity, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green,
 			float blue, float alpha) {
+			<#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
+              this.mainHandItem = entity.getMainHandItem();
+              this.offhandItem = entity.getOffhandItem();
+            </#if>
 			<#if data.visualScale??>
 			<#if hasProcedure(data.visualScale)>
         		Level world = entity.level();

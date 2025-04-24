@@ -44,6 +44,9 @@ public class AnimatedEntity extends GeneratableElement
     public NumberProcedure visualScale;
     public NumberProcedure boundingBoxScale;
     public String renderType;
+    public String mainHandItemBone;
+    public String offHandItemBone;
+    public NumberProcedure heldItemScale;
     public Procedure solidBoundingBox;
     public List<PropertyDataWithValue<?>> entityDataEntries;
 
@@ -204,6 +207,8 @@ public class AnimatedEntity extends GeneratableElement
         this.rangedItemType = "Default item";
         this.rangedAttackInterval = 20;
         this.rangedAttackRadius = 10;
+        this.mainHandItemBone = "";
+        this.offHandItemBone = "";
 
         this.followRange = 16;
         this.sprintingRange = 8;

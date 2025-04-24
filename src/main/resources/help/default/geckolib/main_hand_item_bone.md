@@ -1,0 +1,1 @@
+The name of the bone that the MAINHAND item should be rendered in. Leave blank to not render mainhand item anywhere.
