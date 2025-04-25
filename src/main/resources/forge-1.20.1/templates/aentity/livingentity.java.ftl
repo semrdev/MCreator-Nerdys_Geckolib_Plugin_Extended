@@ -1251,7 +1251,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		if (<#if data.ranged>(</#if>this.swinging<#if data.ranged> || this.entityData.get(SHOOT))</#if>
 		&& event.getController().getAnimationState() == AnimationController.State.STOPPED) {
 			event.getController().forceAnimationReset();
-			return event.setAndContinue(RawAnimation.begin().thenPlay(this.animation4.getAnim()));
+			return event.setAndContinue(RawAnimation.begin().then(this.animation4.getAnim(), Animation.LoopType.PLAY_ONCE));
 		}
 	return PlayState.CONTINUE;
    	}
