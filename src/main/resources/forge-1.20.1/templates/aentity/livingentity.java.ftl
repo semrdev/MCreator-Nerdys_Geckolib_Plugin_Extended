@@ -885,7 +885,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	}
 	</#if>
 
-    <#if data.ridable && (data.canControlForward || data.canControlStrafe)>
+    <#if data.canControlForward || data.canControlStrafe>
         @Override public void travel(Vec3 dir) {
         	<#if data.canControlForward || data.canControlStrafe>
 			Entity entity = this.getPassengers().isEmpty() ? null : (Entity) this.getPassengers().get(0);
