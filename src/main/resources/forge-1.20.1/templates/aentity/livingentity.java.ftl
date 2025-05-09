@@ -1377,6 +1377,14 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     private ResourceLocation cachedResourceLoc;
 
     @Override
+    public void setBonesToTexture(String texture, String boneNames, Boolean recursive, boolean remove) {
+        this.cached${name}Renderer = getAndCacheEntityRenderer();
+        this.cachedResourceLoc = new ResourceLocation("${modid}", "textures/entities/" + texture + ".png");
+
+        this.processTextureLayerUpdate(texture, boneNames, recursive, remove);
+    }
+
+    @Override
     public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive, boolean remove) {
         this.cached${name}Renderer = getAndCacheEntityRenderer();
         if (this.cached${name}Renderer != null) {
@@ -1384,34 +1392,42 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 
             if (player != null) {
                 this.cachedResourceLoc = getPlayerSkin(player);
-                BoneTextureLayer textureLayer;
-                if (this.boneTextureLayers.containsKey(player.getStringUUID())) {
-                    textureLayer = this.boneTextureLayers.get(player.getStringUUID());
-                    if (!remove) {
-                        textureLayer.addBones(boneArray);
-                    }
-                    else {
-                        textureLayer.removeBones(boneArray);
-                    }
+                this.processTextureLayerUpdate(player.getStringUUID(), boneNames, recursive, remove);
+            }
+        }
+    }
+
+    private void processTextureLayerUpdate(String layerKey, String boneNames, Boolean recursive, boolean remove) {
+        if (this.cached${name}Renderer != null && this.cachedResourceLoc != null) {
+            String[] boneArray = boneNames.replaceAll("\\s+", "").split(",");
+
+            BoneTextureLayer textureLayer;
+            if (this.boneTextureLayers.containsKey(layerKey)) {
+                textureLayer = this.boneTextureLayers.get(layerKey);
+                if (!remove) {
+                    textureLayer.addBones(boneArray);
                 }
                 else {
-                    textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, boneArray);
-                    this.boneTextureLayers.put(player.getStringUUID(), textureLayer);
+                    textureLayer.removeBones(boneArray);
                 }
+            }
+            else {
+                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, boneArray);
+                this.boneTextureLayers.put(layerKey, textureLayer);
+            }
 
-                for (String boneName : boneArray) {
-                    this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
-                    if (this.cachedGeoModel != null) {
-                        this.cachedGeoBone = this.cachedGeoModel.getBone(boneName).orElse(null);
-                        if (recursive && this.cachedGeoBone != null) {
-                            recursivelySetChildBonesToTextureLayer(textureLayer, this.cachedGeoBone, remove);
-                        }
+            for (String boneName : boneArray) {
+                this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
+                if (this.cachedGeoModel != null) {
+                    this.cachedGeoBone = this.cachedGeoModel.getBone(boneName).orElse(null);
+                    if (recursive && this.cachedGeoBone != null) {
+                        recursivelySetChildBonesToTextureLayer(textureLayer, this.cachedGeoBone, remove);
                     }
                 }
+            }
 
-                if (remove && textureLayer != null && !textureLayer.hasBones()) {
-                    this.boneTextureLayers.remove(player.getStringUUID());
-                }
+            if (remove && textureLayer != null && !textureLayer.hasBones()) {
+                this.boneTextureLayers.remove(layerKey);
             }
         }
     }

@@ -26,6 +26,8 @@ public interface IGeckoLibEntity {
 
     public void toggleModelBones(String bones, Boolean visible);
 
+    public void setBonesToTexture(String texture, String boneNames, Boolean recursive, boolean remove);
+
     public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive, boolean remove);
 
     public void offsetBoneUVs(String bones, float uOffset, float vOffset);
