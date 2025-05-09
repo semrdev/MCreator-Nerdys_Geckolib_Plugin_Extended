@@ -1347,6 +1347,37 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	public String passengerBoneName = "";
     private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
 
+    private EntityRenderer<?> cachedEntityRenderer;
+    private ${name}Renderer cached${name}Renderer;
+
+    private GeoBone cachedPassengerBone;
+    private GeoModel<?> cachedGeoModel;
+    private Vector3d cachedBoneWorldPosVector3d;
+    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
+    private Vec3 cachedPassengerOffset = new Vec3(0.0D, 0.0D, 0.0D);
+    private Vec3 cachedPassengerPosition = new Vec3(0.0D, 0.0D, 0.0D);
+
+    private ${name}Renderer getAndCacheEntityRenderer() {
+        if (level().isClientSide) {
+            this.cachedEntityRenderer = Minecraft.getInstance()
+                                                 .getEntityRenderDispatcher()
+                                                 .getRenderer(this);
+            if (this.cachedEntityRenderer instanceof ${name}Renderer cached${name}Renderer) {
+                this.cached${name}Renderer = cached${name}Renderer;
+                return this.cached${name}Renderer;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive) {
+        this.cached${name}Renderer = getAndCacheEntityRenderer();
+        if (this.cached${name}Renderer != null) {
+            this.cached${name}Renderer.setBonesToPlayerTexture(player, boneNames, recursive);
+        }
+    }
+
 	// Functions for changing the passenger ride attachment point.
 	// This is useful for entities with a seat in a specific location,
 	// or even something where the seat moves as the entity animations
@@ -1368,28 +1399,14 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         this.passengerBoneName = "";
     }
 
-    private EntityRenderer<?> cachedEntityRenderer;
-    private ${name}Renderer cached${name}Renderer;
-    private GeoBone cachedPassengerBone;
-    private GeoModel<?> cachedGeoModel;
-    private Vector3d cachedBoneWorldPosVector3d;
-    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
-    private Vec3 cachedPassengerOffset = new Vec3(0.0D, 0.0D, 0.0D);
-    private Vec3 cachedPassengerPosition = new Vec3(0.0D, 0.0D, 0.0D);
-
     private Vec3 calculatePassengerPosition() {
         this.cachedPassengerOffset = new Vec3(this.passengerOffsetX, this.passengerOffsetY, passengerOffsetZ);
         this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
 
         if (level().isClientSide) {
-            this.cachedEntityRenderer = Minecraft.getInstance()
-                                                 .getEntityRenderDispatcher()
-                                                 .getRenderer(this);
+            this.cached${name}Renderer = getAndCacheEntityRenderer();
 
-            if (this.cachedEntityRenderer instanceof ${name}Renderer cached${name}Renderer) {
-
-                this.cached${name}Renderer = cached${name}Renderer;
-
+            if (this.cached${name}Renderer != null) {
                 // Access the GeckoLib model bone
                 this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
                 if (this.cachedGeoModel != null) {

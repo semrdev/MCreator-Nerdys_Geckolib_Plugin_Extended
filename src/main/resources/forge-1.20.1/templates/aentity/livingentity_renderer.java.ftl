@@ -45,23 +45,21 @@ import java.util.*;
 
 public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
-  public static Set<GeoBone> HIDDEN_BONE_CACHE;
+    <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
+    private static final String RIGHT_HAND = "${data.mainHandItemBone}";
+    private static final String LEFT_HAND = "${data.offHandItemBone}";
+    protected ItemStack mainHandItem;
+    protected ItemStack offhandItem;
+    </#if>
 
-  <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
-  private static final String RIGHT_HAND = "${data.mainHandItemBone}";
-  private static final String LEFT_HAND = "${data.offHandItemBone}";
-  protected ItemStack mainHandItem;
-  protected ItemStack offhandItem;
-  </#if>
-
-  public ${name}Renderer(EntityRendererProvider.Context renderManager) {
-     super(renderManager, new ${name}Model());
-     ${shadowRadius}
-     <#if data.mobModelGlowTexture?has_content>
-     this.addRenderLayer(new ${name}Layer(this));
-     </#if>
-     <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
-     // Add held item rendering
+    public ${name}Renderer(EntityRendererProvider.Context renderManager) {
+    super(renderManager, new ${name}Model());
+    ${shadowRadius}
+    <#if data.mobModelGlowTexture?has_content>
+    this.addRenderLayer(new ${name}Layer(this));
+    </#if>
+    <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
+    // Add held item rendering
         addRenderLayer(new BlockAndItemGeoLayer<>(this) {
             private float heldItemScale = 1.0f;
 
@@ -121,15 +119,15 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
             }
         });
      </#if>
-  }
+    }
 
-   @Override
-   public RenderType getRenderType(${name}Entity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
-      <#if data.renderType?? && data.renderType == "UNLIT_TRANSLUCENT">
+    @Override
+    public RenderType getRenderType(${name}Entity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
+        <#if data.renderType?? && data.renderType == "UNLIT_TRANSLUCENT">
         return ForgeRenderTypes.getUnlitTranslucent(texture);
-      <#else>
+        <#else>
         return RenderType.entityTranslucent(texture);
-      </#if>
+        </#if>
 	}
 
 	@Override
@@ -154,38 +152,28 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
                 this.scaleWidth = scale;
             </#if>
 
-        // This is the processor for hiding any of the bones on the character.
-        if (entity.hiddenBones != null) {
-
-            if (HIDDEN_BONE_CACHE == null) {
-                HIDDEN_BONE_CACHE = new HashSet<GeoBone>();
-            }
-            else {
-                for (GeoBone bone : HIDDEN_BONE_CACHE) {
-                    if (bone != null) {
-                        bone.setHidden(false);
-                        bone.setChildrenHidden(false);
-                    }
-                }
-            }
-
-            for (String boneName : entity.hiddenBones) {
-                if (boneName != null) {
-                    Optional<GeoBone> boneToHide = model.getBone(boneName);
-                    if (boneToHide.isPresent()) {
-                        boneToHide.get().setHidden(true);
-                        boneToHide.get().setChildrenHidden(true);
-                        HIDDEN_BONE_CACHE.add(boneToHide.get());
-                    }
-                }
-            }
-        }
-
         super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
     private OffsetVertexConsumer cachedOffsetVertexConsumer = new OffsetVertexConsumer();
     private ${name}Entity.BoneUVOffset uvOffset;
+
+    private BoneTextureLayer cachedBoneTextureLayer;
+
+    @Override
+    public void applyRenderLayers(PoseStack poseStack, ${name}Entity animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource,
+    								   VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+    		for (GeoRenderLayer<${name}Entity> renderLayer : getRenderLayers()) {
+    		    if (renderLayer instanceof BoneTextureLayer boneTextureLayer)
+    		    {
+    		        this.cachedBoneTextureLayer = boneTextureLayer;
+    		    }
+    		    else {
+                    this.cachedBoneTextureLayer = null;
+    		    }
+    			renderLayer.render(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+    		}
+    }
 
     @Override
     public void renderRecursively(PoseStack poseStack, ${name}Entity entity, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
@@ -197,6 +185,19 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
             this.uvOffset = entity.boneUVOffsets.get(bone.getName());
         }
 
+        if (isReRender && this.cachedBoneTextureLayer != null) {
+            if (!this.cachedBoneTextureLayer.hasBone(bone.getName())) {
+                // This is the processor for not rendering certain bones on the texture override layers.
+                // This will also prevent the children of excluded bones from rendering.
+                return;
+            }
+        }
+        else if (entity.hiddenBones != null && entity.hiddenBones.contains(bone.getName())) {
+            // This is the processor for not rendering any of the bones on the character.
+            // This will also prevent its child bones from rendering.
+            return;
+        }
+
         if (this.uvOffset != null) {
             this.cachedOffsetVertexConsumer.setup(buffer, this.uvOffset.uOffset(), this.uvOffset.vOffset());
             super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.cachedOffsetVertexConsumer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
@@ -205,10 +206,77 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
         }
     }
 
-<#if data.disableDeathRotation>
- @Override
+    @Override
+    public void renderFinal(PoseStack poseStack, ${name}Entity animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
+           							int packedOverlay, float red, float green, float blue, float alpha) {
+        super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        this.cachedBoneTextureLayer = null;
+
+    }
+
+    // A hash map for storing the custom texture override render layers applied to this renderer.
+    private final Map<String, BoneTextureLayer> boneTextureLayers = new HashMap<>();
+
+    private GeoModel<?> cachedGeoModel;
+    private GeoBone cachedGeoBone;
+    private ResourceLocation cachedResourceLoc;
+
+    private ResourceLocation getPlayerSkin(Player player) {
+        if (player != null && player.getGameProfile() != null) {
+            Minecraft mc = Minecraft.getInstance();
+            SkinManager skinManager = mc.getSkinManager();
+                if (skinManager != null) {
+                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures =
+                    skinManager.getInsecureSkinInformation(player.getGameProfile());
+                    if (textures.containsKey(MinecraftProfileTexture.Type.SKIN)) {
+                        return skinManager.registerTexture(textures.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+                    }
+                }
+                return DefaultPlayerSkin.getDefaultSkin(player.getUUID());
+            }
+        return null;
+    }
+
+    // Set by procedures in MCreator - loop through and recursively map all the bones beneath this one as well.
+    public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive) {
+        String[] boneArray = boneNames.replaceAll("\\s+", "").split(",");
+
+        if (player != null) {
+            this.cachedResourceLoc = getPlayerSkin(player);
+            BoneTextureLayer textureLayer;
+            if (this.boneTextureLayers.containsKey(player.getStringUUID())) {
+                textureLayer = this.boneTextureLayers.get(player.getStringUUID());
+                textureLayer.addBones(boneArray);
+            }
+            else {
+                textureLayer = new BoneTextureLayer(this, this.cachedResourceLoc, boneArray);
+                this.addRenderLayer(textureLayer);
+            }
+
+            for (String boneName : boneArray) {
+                this.cachedGeoModel = this.getGeoModel();
+                if (this.cachedGeoModel != null) {
+                    this.cachedGeoBone = this.cachedGeoModel.getBone(boneName).orElse(null);
+                    if (recursive && this.cachedGeoBone != null) {
+                        recursivelyAddChildBonesToTextureLayer(textureLayer, this.cachedGeoBone);
+                    }
+                }
+            }
+        }
+    }
+
+    private void recursivelyAddChildBonesToTextureLayer(BoneTextureLayer textureLayer, GeoBone bone) {
+        textureLayer.addBone(bone.getName());
+        for (GeoBone childBone : bone.getChildBones())
+        {
+            this.recursivelyAddChildBonesToTextureLayer(textureLayer, childBone);
+        }
+    }
+
+    <#if data.disableDeathRotation>
+    @Override
 	protected float getDeathMaxRotation(${name}Entity entityLivingBaseIn) {
 		return 0.0F;
 	} 
-</#if>
+    </#if>
 }
