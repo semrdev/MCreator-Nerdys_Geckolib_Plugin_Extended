@@ -34,22 +34,22 @@ public class BoneTextureLayer<T extends GeoEntity> extends GeoRenderLayer<T> {
         this.renderType = RenderType.entityCutoutNoCull(this.texture);
     }
 
-    protected boolean addBones(String[] bones) {
+    public boolean addBones(String[] bones) {
         this.bones.addAll(Arrays.asList(bones));
         return hasBones();
     }
 
-    protected boolean addBone(String bone) {
+    public boolean addBone(String bone) {
         this.bones.add(bone);
         return hasBones();
     }
 
-    protected boolean removeBones(String[] bones) {
+    public boolean removeBones(String[] bones) {
         this.bones.removeAll(Arrays.asList(bones));
         return hasBones();
     }
 
-    protected boolean removeBone(String bone) {
+    public boolean removeBone(String bone) {
         this.bones.remove(bone);
         return hasBones();
     }

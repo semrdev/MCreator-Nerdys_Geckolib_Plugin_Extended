@@ -1370,11 +1370,64 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         return null;
     }
 
+    // A hash map for storing the custom texture override render layers applied to this entity's renderer.
+    public final Map<String, BoneTextureLayer> boneTextureLayers = new HashMap<>();
+
+    private GeoBone cachedGeoBone;
+    private ResourceLocation cachedResourceLoc;
+
     @Override
     public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive) {
         this.cached${name}Renderer = getAndCacheEntityRenderer();
         if (this.cached${name}Renderer != null) {
-            this.cached${name}Renderer.setBonesToPlayerTexture(player, boneNames, recursive);
+            String[] boneArray = boneNames.replaceAll("\\s+", "").split(",");
+
+            if (player != null) {
+                this.cachedResourceLoc = getPlayerSkin(player);
+                BoneTextureLayer textureLayer;
+                if (this.boneTextureLayers.containsKey(player.getStringUUID())) {
+                    textureLayer = this.boneTextureLayers.get(player.getStringUUID());
+                    textureLayer.addBones(boneArray);
+                }
+                else {
+                    textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, boneArray);
+                    this.boneTextureLayers.put(player.getStringUUID(), textureLayer);
+                }
+
+                for (String boneName : boneArray) {
+                    this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
+                    if (this.cachedGeoModel != null) {
+                        this.cachedGeoBone = this.cachedGeoModel.getBone(boneName).orElse(null);
+                        if (recursive && this.cachedGeoBone != null) {
+                            recursivelyAddChildBonesToTextureLayer(textureLayer, this.cachedGeoBone);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private ResourceLocation getPlayerSkin(Player player) {
+        if (player != null && player.getGameProfile() != null) {
+            Minecraft mc = Minecraft.getInstance();
+            SkinManager skinManager = mc.getSkinManager();
+                if (skinManager != null) {
+                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures =
+                    skinManager.getInsecureSkinInformation(player.getGameProfile());
+                    if (textures.containsKey(MinecraftProfileTexture.Type.SKIN)) {
+                        return skinManager.registerTexture(textures.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+                    }
+                }
+                return DefaultPlayerSkin.getDefaultSkin(player.getUUID());
+            }
+        return null;
+    }
+
+    private void recursivelyAddChildBonesToTextureLayer(BoneTextureLayer textureLayer, GeoBone bone) {
+        textureLayer.addBone(bone.getName());
+        for (GeoBone childBone : bone.getChildBones())
+        {
+            this.recursivelyAddChildBonesToTextureLayer(textureLayer, childBone);
         }
     }
 

@@ -152,6 +152,13 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
                 this.scaleWidth = scale;
             </#if>
 
+        // Check if we should temporarily add any RenderLayers for custom textures
+        for (GeoRenderLayer layerToAdd : entity.boneTextureLayers.values()) {
+            if (!this.getRenderLayers().contains(layerToAdd)) {
+                this.addRenderLayer(layerToAdd);
+            }
+        }
+
         super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
@@ -212,64 +219,9 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
         super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         this.cachedBoneTextureLayer = null;
 
-    }
-
-    // A hash map for storing the custom texture override render layers applied to this renderer.
-    private final Map<String, BoneTextureLayer> boneTextureLayers = new HashMap<>();
-
-    private GeoModel<?> cachedGeoModel;
-    private GeoBone cachedGeoBone;
-    private ResourceLocation cachedResourceLoc;
-
-    private ResourceLocation getPlayerSkin(Player player) {
-        if (player != null && player.getGameProfile() != null) {
-            Minecraft mc = Minecraft.getInstance();
-            SkinManager skinManager = mc.getSkinManager();
-                if (skinManager != null) {
-                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures =
-                    skinManager.getInsecureSkinInformation(player.getGameProfile());
-                    if (textures.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                        return skinManager.registerTexture(textures.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-                    }
-                }
-                return DefaultPlayerSkin.getDefaultSkin(player.getUUID());
-            }
-        return null;
-    }
-
-    // Set by procedures in MCreator - loop through and recursively map all the bones beneath this one as well.
-    public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive) {
-        String[] boneArray = boneNames.replaceAll("\\s+", "").split(",");
-
-        if (player != null) {
-            this.cachedResourceLoc = getPlayerSkin(player);
-            BoneTextureLayer textureLayer;
-            if (this.boneTextureLayers.containsKey(player.getStringUUID())) {
-                textureLayer = this.boneTextureLayers.get(player.getStringUUID());
-                textureLayer.addBones(boneArray);
-            }
-            else {
-                textureLayer = new BoneTextureLayer(this, this.cachedResourceLoc, boneArray);
-                this.addRenderLayer(textureLayer);
-            }
-
-            for (String boneName : boneArray) {
-                this.cachedGeoModel = this.getGeoModel();
-                if (this.cachedGeoModel != null) {
-                    this.cachedGeoBone = this.cachedGeoModel.getBone(boneName).orElse(null);
-                    if (recursive && this.cachedGeoBone != null) {
-                        recursivelyAddChildBonesToTextureLayer(textureLayer, this.cachedGeoBone);
-                    }
-                }
-            }
-        }
-    }
-
-    private void recursivelyAddChildBonesToTextureLayer(BoneTextureLayer textureLayer, GeoBone bone) {
-        textureLayer.addBone(bone.getName());
-        for (GeoBone childBone : bone.getChildBones())
-        {
-            this.recursivelyAddChildBonesToTextureLayer(textureLayer, childBone);
+        // Clean up the render layers that are no longer needed.
+        for (GeoRenderLayer layerToRemove : animatable.boneTextureLayers.values()) {
+            this.renderLayers.getRenderLayers().remove(layerToRemove);
         }
     }
 
