@@ -11,12 +11,26 @@
       "check": "Boolean"
     },
     {
+      "type": "field_dropdown",
+      "name": "recursive",
+      "options": [
+        [
+          "child bones too",
+          "TRUE"
+        ],
+        [
+          "only listed bones",
+          "FALSE"
+        ]
+      ]
+    },
+    {
       "type": "input_value",
       "name": "entity",
       "check": "Entity"
     }
   ],
-  "inputsInline": true,
+  "inputsInline": false,
   "previousStatement": null,
   "nextStatement": null,
   "colour": "364",
@@ -31,6 +45,9 @@
       "bone",
       "visible",
       "entity"
+    ],
+    "fields": [
+      "recursive"
     ]
   }
 }

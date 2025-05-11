@@ -1303,20 +1303,22 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		this.entityData.set(ANIMATION, animation);
 	}
 
-	public Set<String> hiddenBones;
-	public void toggleModelBones(String bones, Boolean visible) {
+	// A hash map for storing hidden bones.
+	// Bone name is the access key, recursive hiding is the value
+    public final Map<String, Boolean> hiddenBones = new HashMap<>();
+
+    @Override
+	public void toggleModelBones(String bones, Boolean visible, Boolean recursive) {
 		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
 
-		if (hiddenBones == null) {
-			hiddenBones = new HashSet<String>();
-		}
-
-		if (visible) {
-			hiddenBones.removeAll(Arrays.asList(boneArray));
-		}
-		else {
-			hiddenBones.addAll(Arrays.asList(boneArray));
-		}
+        for (String bone : boneArray) {
+            if (visible) {
+                this.hiddenBones.remove(bone);
+            }
+            else {
+                this.hiddenBones.put(bone, recursive);
+            }
+        }
 	}
 
 	// A custom record for storing the bone UV offsets inside a hash map.
@@ -1377,59 +1379,41 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     private ResourceLocation cachedResourceLoc;
 
     @Override
-    public void setBonesToTexture(String texture, String boneNames, Boolean recursive, boolean remove) {
+    public void setBonesToTexture(String layerKey, String texture, String renderType, String bones, Boolean hide, Boolean recursive) {
         this.cached${name}Renderer = getAndCacheEntityRenderer();
         this.cachedResourceLoc = new ResourceLocation("${modid}", "textures/entities/" + texture + ".png");
 
-        this.processTextureLayerUpdate(texture, boneNames, recursive, remove);
+        this.processTextureLayerUpdate(layerKey, renderType, bones, hide, recursive);
     }
 
     @Override
-    public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive, boolean remove) {
-        this.cached${name}Renderer = getAndCacheEntityRenderer();
-        if (this.cached${name}Renderer != null) {
-            String[] boneArray = boneNames.replaceAll("\\s+", "").split(",");
-
-            if (player != null) {
-                this.cachedResourceLoc = getPlayerSkin(player);
-                this.processTextureLayerUpdate(player.getStringUUID(), boneNames, recursive, remove);
-            }
+    public void setBonesToPlayerTexture(String layerKey, Player player, String renderType, String bones, Boolean hide, Boolean recursive) {
+        if (player != null) {
+            this.cached${name}Renderer = getAndCacheEntityRenderer();
+            this.cachedResourceLoc = getPlayerSkin(player);
+            this.processTextureLayerUpdate(layerKey, renderType, bones, hide, recursive);
         }
     }
 
-    private void processTextureLayerUpdate(String layerKey, String boneNames, Boolean recursive, boolean remove) {
+    private void processTextureLayerUpdate(String layerKey, String renderType, String bones, Boolean hide, Boolean recursive) {
         if (this.cached${name}Renderer != null && this.cachedResourceLoc != null) {
-            String[] boneArray = boneNames.replaceAll("\\s+", "").split(",");
 
             BoneTextureLayer textureLayer;
             if (this.boneTextureLayers.containsKey(layerKey)) {
                 textureLayer = this.boneTextureLayers.get(layerKey);
-                if (!remove) {
-                    textureLayer.addBones(boneArray);
-                }
-                else {
-                    textureLayer.removeBones(boneArray);
-                }
+                textureLayer.setTextureAndRenderType(this.cachedResourceLoc, renderType);
+                textureLayer.toggleLayerBones(bones, !hide, recursive);
             }
             else {
-                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, boneArray);
+                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, renderType, bones, !hide, recursive);
                 this.boneTextureLayers.put(layerKey, textureLayer);
             }
-
-            for (String boneName : boneArray) {
-                this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
-                if (this.cachedGeoModel != null) {
-                    this.cachedGeoBone = this.cachedGeoModel.getBone(boneName).orElse(null);
-                    if (recursive && this.cachedGeoBone != null) {
-                        recursivelySetChildBonesToTextureLayer(textureLayer, this.cachedGeoBone, remove);
-                    }
-                }
-            }
-
-            if (remove && textureLayer != null && !textureLayer.hasBones()) {
-                this.boneTextureLayers.remove(layerKey);
-            }
         }
+    }
+
+    @Override
+    public void removeBoneTexture(String layerKey) {
+        this.boneTextureLayers.remove(layerKey);
     }
 
     private ResourceLocation getPlayerSkin(Player player) {
@@ -1446,21 +1430,6 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
                 return DefaultPlayerSkin.getDefaultSkin(player.getUUID());
             }
         return null;
-    }
-
-    private void recursivelySetChildBonesToTextureLayer(BoneTextureLayer textureLayer, GeoBone bone, boolean remove) {
-
-        if (!remove) {
-            textureLayer.addBone(bone.getName());
-        }
-        else {
-            textureLayer.removeBone(bone.getName());
-        }
-
-        for (GeoBone childBone : bone.getChildBones())
-        {
-            this.recursivelySetChildBonesToTextureLayer(textureLayer, childBone, remove);
-        }
     }
 
 	// Functions for changing the passenger ride attachment point.

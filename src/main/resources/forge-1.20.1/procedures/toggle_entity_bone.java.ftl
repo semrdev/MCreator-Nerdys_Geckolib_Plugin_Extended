@@ -1,3 +1,3 @@
 if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
-geckoLibEntity.toggleModelBones(${input$bone}, ${input$visible});
+geckoLibEntity.toggleModelBones(${input$bone}, ${input$visible}, "${field$recursive}" == "TRUE");
 }

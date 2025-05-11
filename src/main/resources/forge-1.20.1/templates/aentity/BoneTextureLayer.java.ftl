@@ -22,44 +22,51 @@ import java.util.Map;
 
 public class BoneTextureLayer<T extends GeoEntity> extends GeoRenderLayer<T> {
 
-    private final ResourceLocation texture;
-    private final Set<String> bones = new HashSet<String>();
-    private final RenderType renderType;
+    private ResourceLocation texture;
+    private RenderType renderType;
 
-    public BoneTextureLayer(GeoRenderer<T> renderer, ResourceLocation texture, String[] bones) {
+    public Boolean useRendererDefaultBoneSettings = false;
+    public final Map<String, Boolean> hiddenBones = new HashMap<>();
+
+    public BoneTextureLayer(GeoRenderer<T> renderer, ResourceLocation texture, String renderType, String bones, Boolean visible, Boolean recursive) {
         super(renderer);
-
-        this.texture = texture;
-        this.addBones(bones);
-        this.renderType = RenderType.entityCutoutNoCull(this.texture);
+        setTextureAndRenderType(texture, renderType);
+        toggleLayerBones(bones, visible, recursive);
     }
 
-    public boolean addBones(String[] bones) {
-        this.bones.addAll(Arrays.asList(bones));
-        return hasBones();
+    private RenderType GetRenderType(String renderType) {
+        if (renderType == "TRANSLUCENT") {
+            return RenderType.entityTranslucent(this.texture);
+        }
+        else if (renderType == "UNLIT_TRANSLUCENT") {
+            return ForgeRenderTypes.getUnlitTranslucent(texture);
+        }
+        else if (renderType == "GLOW") {
+            return RenderType.eyes(this.texture);
+        }
+        else {
+            return RenderType.entityCutoutNoCull(this.texture);
+        }
     }
 
-    public boolean addBone(String bone) {
-        this.bones.add(bone);
-        return hasBones();
+    public void setTextureAndRenderType(ResourceLocation texture, String renderType) {
+        if (texture != null) {
+            this.texture = texture;
+        }
+        this.renderType = GetRenderType(renderType);
     }
 
-    public boolean removeBones(String[] bones) {
-        this.bones.removeAll(Arrays.asList(bones));
-        return hasBones();
-    }
+    public void toggleLayerBones(String bones, Boolean visible, Boolean recursive) {
+        String[] boneArray = bones.replaceAll("\\s+", "").split(",");
 
-    public boolean removeBone(String bone) {
-        this.bones.remove(bone);
-        return hasBones();
-    }
-
-    public boolean hasBones() {
-        return !this.bones.isEmpty();
-    }
-
-    public boolean hasBone(String boneName) {
-        return this.bones.contains(boneName);
+        for (String bone : boneArray) {
+            if (visible) {
+                this.hiddenBones.remove(bone);
+            }
+            else {
+                this.hiddenBones.put(bone, recursive);
+            }
+        }
     }
 
     @Override

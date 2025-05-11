@@ -1,3 +1,3 @@
 if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
-    geckoLibEntity.setBonesToTexture(${input$texture}, ${input$bone}, ${input$recursive}, false);
+    geckoLibEntity.setBonesToTexture(${input$layerKey}, ${input$texture}, "${field$renderType}", ${input$bone}, ${input$hidden}, "${field$recursive}" == "TRUE");
 }

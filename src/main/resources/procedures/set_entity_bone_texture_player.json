@@ -2,7 +2,7 @@
   "args0": [
     {
       "type": "input_value",
-      "name": "bone",
+      "name": "layerKey",
       "check": "String"
     },
     {
@@ -11,9 +11,46 @@
       "check": "Entity"
     },
     {
+      "type": "field_dropdown",
+      "name": "renderType",
+      "options": [
+        [
+          "TRANSLUCENT",
+          "TRANSLUCENT"
+        ],
+        [
+          "UNLIT_TRANSLUCENT",
+          "UNLIT_TRANSLUCENT"
+        ],
+        [
+          "GLOW",
+          "GLOW"
+        ]
+      ]
+    },
+    {
       "type": "input_value",
-      "name": "recursive",
+      "name": "bone",
+      "check": "String"
+    },
+    {
+      "type": "input_value",
+      "name": "hidden",
       "check": "Boolean"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "recursive",
+      "options": [
+        [
+          "child bones too",
+          "TRUE"
+        ],
+        [
+          "only listed bones",
+          "FALSE"
+        ]
+      ]
     },
     {
       "type": "input_value",
@@ -28,16 +65,22 @@
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
+      "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
       "<value name=\"player\"><block type=\"entity_from_deps\"></block></value>",
-      "<value name=\"recursive\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
+      "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
+      "<value name=\"hidden\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
-      "bone",
+      "layerKey",
       "player",
-      "recursive",
+      "bone",
+      "hidden",
       "entity"
+    ],
+    "fields": [
+      "renderType",
+      "recursive"
     ]
   }
 }

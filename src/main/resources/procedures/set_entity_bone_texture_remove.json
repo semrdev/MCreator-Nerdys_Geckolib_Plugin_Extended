@@ -2,18 +2,8 @@
   "args0": [
     {
       "type": "input_value",
-      "name": "bone",
+      "name": "layerKey",
       "check": "String"
-    },
-    {
-      "type": "input_value",
-      "name": "texture",
-      "check": "String"
-    },
-    {
-      "type": "input_value",
-      "name": "recursive",
-      "check": "Boolean"
     },
     {
       "type": "input_value",
@@ -28,15 +18,11 @@
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
-      "<value name=\"texture\"><block type=\"text\"><field name=\"TEXT\"></field></block></value>",
-      "<value name=\"recursive\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
+      "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
-      "bone",
-      "texture",
-      "recursive",
+      "layerKey",
       "entity"
     ]
   }

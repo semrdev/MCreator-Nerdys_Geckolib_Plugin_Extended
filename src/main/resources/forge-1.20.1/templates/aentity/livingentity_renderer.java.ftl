@@ -45,6 +45,8 @@ import java.util.*;
 
 public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
+    public static Set<GeoBone> HIDDEN_BONE_CACHE = new HashSet<GeoBone>();
+
     <#if data.mainHandItemBone?has_content || data.offHandItemBone?has_content>
     private static final String RIGHT_HAND = "${data.mainHandItemBone}";
     private static final String LEFT_HAND = "${data.offHandItemBone}";
@@ -159,6 +161,11 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
             }
         }
 
+        // Refresh which bones should be hidden on this render pass.
+        if (!isReRender) {
+            hideBones(entity.hiddenBones);
+        }
+
         super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
@@ -170,16 +177,22 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
     @Override
     public void applyRenderLayers(PoseStack poseStack, ${name}Entity animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource,
     								   VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-    		for (GeoRenderLayer<${name}Entity> renderLayer : getRenderLayers()) {
-    		    if (renderLayer instanceof BoneTextureLayer boneTextureLayer)
-    		    {
-    		        this.cachedBoneTextureLayer = boneTextureLayer;
-    		    }
-    		    else {
-                    this.cachedBoneTextureLayer = null;
-    		    }
-    			renderLayer.render(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
-    		}
+        for (GeoRenderLayer<${name}Entity> renderLayer : getRenderLayers()) {
+            if (renderLayer instanceof BoneTextureLayer boneTextureLayer)
+            {
+                this.cachedBoneTextureLayer = boneTextureLayer;
+                if (this.cachedBoneTextureLayer.useRendererDefaultBoneSettings) {
+                    hideBones(animatable.hiddenBones);
+                }
+                else {
+                    hideBones(boneTextureLayer.hiddenBones);
+                }
+            }
+            else {
+                this.cachedBoneTextureLayer = null;
+            }
+            renderLayer.render(poseStack, animatable, model, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+        }
     }
 
     @Override
@@ -192,6 +205,7 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
             this.uvOffset = entity.boneUVOffsets.get(bone.getName());
         }
 
+        /*
         if (isReRender && this.cachedBoneTextureLayer != null) {
             if (!this.cachedBoneTextureLayer.hasBone(bone.getName())) {
                 // This is the processor for not rendering certain bones on the texture override layers.
@@ -204,12 +218,36 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
             // This will also prevent its child bones from rendering.
             return;
         }
+        */
 
         if (this.uvOffset != null) {
             this.cachedOffsetVertexConsumer.setup(buffer, this.uvOffset.uOffset(), this.uvOffset.vOffset());
             super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.cachedOffsetVertexConsumer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         } else {
             super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        }
+    }
+
+    private void hideBones(Map<String, Boolean> hiddenBones) {
+        // First, reset bones for fresh rendering pass.
+        for (GeoBone bone : HIDDEN_BONE_CACHE) {
+            if (bone != null) {
+                bone.setHidden(false);
+                bone.setChildrenHidden(false);
+            }
+        }
+
+        // Now loop through and hide the ones from the provided hash set.
+        if (!hiddenBones.isEmpty()) {
+            for (Map.Entry<String, Boolean> hiddenBone : hiddenBones.entrySet()) {
+                Optional<GeoBone> boneToHide = model.getBone(hiddenBone.getKey());
+                if (boneToHide.isPresent()) {
+                    boneToHide.get().setHidden(true);
+                    // Only hide children if "recursive" is true.
+                    boneToHide.get().setChildrenHidden(hiddenBone.getValue());
+                    HIDDEN_BONE_CACHE.add(boneToHide.get());
+                }
+            }
         }
     }
 

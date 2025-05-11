@@ -24,11 +24,13 @@ public interface IGeckoLibEntity {
 
 	public void setAnimation(String animation);
 
-    public void toggleModelBones(String bones, Boolean visible);
+    public void toggleModelBones(String bones, Boolean visible, Boolean recursive);
 
-    public void setBonesToTexture(String texture, String boneNames, Boolean recursive, boolean remove);
+    public void setBonesToTexture(String layerKey, String texture, String renderType, String boneNames, Boolean hide, Boolean recursive);
 
-    public void setBonesToPlayerTexture(Player player, String boneNames, Boolean recursive, boolean remove);
+    public void setBonesToPlayerTexture(String layerKey, Player player, String renderType, String boneNames, Boolean hide, Boolean recursive);
+
+    public void removeBoneTexture(String layerKey);
 
     public void offsetBoneUVs(String bones, float uOffset, float vOffset);
 
