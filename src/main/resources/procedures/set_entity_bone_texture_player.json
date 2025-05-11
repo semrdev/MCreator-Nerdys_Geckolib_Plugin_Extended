@@ -66,7 +66,7 @@
     "toolbox_id": "geckolib",
     "toolbox_init": [
       "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
-      "<value name=\"player\"><block type=\"entity_from_deps\"></block></value>",
+      "<value name=\"player\"><block type=\"source_entity_from_deps\"></block></value>",
       "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
       "<value name=\"hidden\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
