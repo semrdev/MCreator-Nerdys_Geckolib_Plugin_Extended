@@ -25,13 +25,12 @@ public class BoneTextureLayer<T extends GeoEntity> extends GeoRenderLayer<T> {
     private ResourceLocation texture;
     private RenderType renderType;
 
-    public Boolean useRendererDefaultBoneSettings = false;
+    public Boolean useRendererDefaultBoneSettings = true;
     public final Map<String, Boolean> hiddenBones = new HashMap<>();
 
-    public BoneTextureLayer(GeoRenderer<T> renderer, ResourceLocation texture, String renderType, String bones, Boolean visible, Boolean recursive) {
+    public BoneTextureLayer(GeoRenderer<T> renderer, ResourceLocation texture, String renderType) {
         super(renderer);
         setTextureAndRenderType(texture, renderType);
-        toggleLayerBones(bones, visible, recursive);
     }
 
     private RenderType GetRenderType(String renderType) {
@@ -60,6 +59,7 @@ public class BoneTextureLayer<T extends GeoEntity> extends GeoRenderLayer<T> {
         String[] boneArray = bones.replaceAll("\\s+", "").split(",");
 
         for (String bone : boneArray) {
+            this.useRendererDefaultBoneSettings = false;
             if (visible) {
                 this.hiddenBones.remove(bone);
             }
@@ -67,6 +67,10 @@ public class BoneTextureLayer<T extends GeoEntity> extends GeoRenderLayer<T> {
                 this.hiddenBones.put(bone, recursive);
             }
         }
+    }
+
+    public void toggleOverrideDefaultBoneSettings(Boolean override) {
+        this.useRendererDefaultBoneSettings = !override;
     }
 
     @Override

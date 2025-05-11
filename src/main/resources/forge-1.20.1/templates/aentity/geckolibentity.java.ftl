@@ -26,11 +26,15 @@ public interface IGeckoLibEntity {
 
     public void toggleModelBones(String bones, Boolean visible, Boolean recursive);
 
-    public void setBonesToTexture(String layerKey, String texture, String renderType, String boneNames, Boolean hide, Boolean recursive);
+    public void addOrModifyTextureRenderLayer(String layerKey, String texture, String renderType);
 
-    public void setBonesToPlayerTexture(String layerKey, Player player, String renderType, String boneNames, Boolean hide, Boolean recursive);
+    public void addOrModifyPlayerRenderLayer(String layerKey, Player player, String renderType);
 
-    public void removeBoneTexture(String layerKey);
+    public void setRenderLayerOverridesBoneToggles(String layerKey, Boolean override);
+
+    public void setRenderLayerBoneSettings(String layerKey, String boneNames, Boolean hide, Boolean recursive);
+
+    public void removeRenderLayer(String layerKey);
 
     public void offsetBoneUVs(String bones, float uOffset, float vOffset);
 

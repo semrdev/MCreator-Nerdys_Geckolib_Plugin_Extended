@@ -1368,40 +1368,55 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     private ResourceLocation cachedResourceLoc;
 
     @Override
-    public void setBonesToTexture(String layerKey, String texture, String renderType, String bones, Boolean hide, Boolean recursive) {
+    public void addOrModifyTextureRenderLayer(String layerKey, String texture, String renderType) {
         this.cached${name}Renderer = getAndCacheEntityRenderer();
         this.cachedResourceLoc = new ResourceLocation("${modid}", "textures/entities/" + texture + ".png");
 
-        this.processTextureLayerUpdate(layerKey, renderType, bones, hide, recursive);
+        this.processTextureLayerUpdate(layerKey, renderType);
     }
 
     @Override
-    public void setBonesToPlayerTexture(String layerKey, Player player, String renderType, String bones, Boolean hide, Boolean recursive) {
+    public void addOrModifyPlayerRenderLayer(String layerKey, Player player, String renderType) {
         if (player != null) {
             this.cached${name}Renderer = getAndCacheEntityRenderer();
             this.cachedResourceLoc = getPlayerSkin(player);
-            this.processTextureLayerUpdate(layerKey, renderType, bones, hide, recursive);
+            this.processTextureLayerUpdate(layerKey, renderType);
         }
     }
 
-    private void processTextureLayerUpdate(String layerKey, String renderType, String bones, Boolean hide, Boolean recursive) {
+    private void processTextureLayerUpdate(String layerKey, String renderType) {
         if (this.cached${name}Renderer != null && this.cachedResourceLoc != null) {
 
             BoneTextureLayer textureLayer;
             if (this.boneTextureLayers.containsKey(layerKey)) {
                 textureLayer = this.boneTextureLayers.get(layerKey);
                 textureLayer.setTextureAndRenderType(this.cachedResourceLoc, renderType);
-                textureLayer.toggleLayerBones(bones, !hide, recursive);
             }
             else {
-                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, renderType, bones, !hide, recursive);
+                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, renderType);
                 this.boneTextureLayers.put(layerKey, textureLayer);
             }
         }
     }
 
     @Override
-    public void removeBoneTexture(String layerKey) {
+    public void setRenderLayerOverridesBoneToggles(String layerKey, Boolean override) {
+        if (this.boneTextureLayers.containsKey(layerKey)) {
+            BoneTextureLayer textureLayer = this.boneTextureLayers.get(layerKey);
+            textureLayer.toggleOverrideDefaultBoneSettings(override);
+        }
+    }
+
+    @Override
+    public void setRenderLayerBoneSettings(String layerKey, String bones, Boolean hide, Boolean recursive) {
+        if (this.boneTextureLayers.containsKey(layerKey)) {
+            BoneTextureLayer textureLayer = this.boneTextureLayers.get(layerKey);
+            textureLayer.toggleLayerBones(bones, !hide, recursive);
+        }
+    }
+
+    @Override
+    public void removeRenderLayer(String layerKey) {
         this.boneTextureLayers.remove(layerKey);
     }
 

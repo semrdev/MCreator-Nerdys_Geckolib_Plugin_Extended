@@ -7,26 +7,8 @@
     },
     {
       "type": "input_value",
-      "name": "texture",
-      "check": "String"
-    },
-    {
-      "type": "field_dropdown",
-      "name": "renderType",
-      "options": [
-        [
-          "TRANSLUCENT",
-          "TRANSLUCENT"
-        ],
-        [
-          "UNLIT_TRANSLUCENT",
-          "UNLIT_TRANSLUCENT"
-        ],
-        [
-          "GLOW",
-          "GLOW"
-        ]
-      ]
+      "name": "override",
+      "check": "Boolean"
     },
     {
       "type": "input_value",
@@ -42,16 +24,13 @@
     "toolbox_id": "geckolib",
     "toolbox_init": [
       "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
-      "<value name=\"texture\"><block type=\"text\"><field name=\"TEXT\"></field></block></value>",
+      "<value name=\"override\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
       "layerKey",
-      "texture",
+      "override",
       "entity"
-    ],
-    "fields": [
-      "renderType"
     ]
   }
 }
