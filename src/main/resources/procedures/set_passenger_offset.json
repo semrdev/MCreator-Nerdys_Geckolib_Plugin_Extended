@@ -22,6 +22,21 @@
     },
     {
       "type": "input_value",
+      "name": "boneOX",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "boneOY",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "boneOZ",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
       "name": "entity",
       "check": "Entity"
     }
@@ -37,6 +52,9 @@
       "<value name=\"y\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
       "<value name=\"z\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
       "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\"></field></block></value>",
+      "<value name=\"boneOX\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
+      "<value name=\"boneOY\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
+      "<value name=\"boneOZ\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
@@ -44,6 +62,9 @@
       "y",
       "z",
       "bone",
+      "boneOX",
+      "boneOY",
+      "boneOZ",
       "entity"
     ]
   }

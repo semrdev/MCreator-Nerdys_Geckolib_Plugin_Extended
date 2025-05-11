@@ -163,6 +163,7 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
         // Refresh which bones should be hidden on this render pass.
         if (!isReRender) {
+            this.foundPassengerBonePosThisPass = false;
             hideBones(entity.hiddenBones);
         }
 
@@ -205,21 +206,6 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
             this.uvOffset = entity.boneUVOffsets.get(bone.getName());
         }
 
-        /*
-        if (isReRender && this.cachedBoneTextureLayer != null) {
-            if (!this.cachedBoneTextureLayer.hasBone(bone.getName())) {
-                // This is the processor for not rendering certain bones on the texture override layers.
-                // This will also prevent the children of excluded bones from rendering.
-                return;
-            }
-        }
-        else if (entity.hiddenBones != null && entity.hiddenBones.contains(bone.getName())) {
-            // This is the processor for not rendering any of the bones on the character.
-            // This will also prevent its child bones from rendering.
-            return;
-        }
-        */
-
         if (this.uvOffset != null) {
             this.cachedOffsetVertexConsumer.setup(buffer, this.uvOffset.uOffset(), this.uvOffset.vOffset());
             super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.cachedOffsetVertexConsumer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
@@ -260,6 +246,25 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
         // Clean up the render layers that are no longer needed.
         for (GeoRenderLayer layerToRemove : animatable.boneTextureLayers.values()) {
             this.renderLayers.getRenderLayers().remove(layerToRemove);
+        }
+
+        this.processPassengerBonePos(animatable);
+    }
+
+    private boolean foundPassengerBonePosThisPass = false;
+    private Vector3d cachedBoneWorldPosVector3d;
+    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
+    private GeoBone cachedPassengerBone;
+
+    private void processPassengerBonePos(${name}Entity entity) {
+        if (!this.foundPassengerBonePosThisPass) {
+            this.cachedPassengerBone = this.getGeoModel().getBone(entity.passengerBoneName).orElse(null);
+            if (this.cachedPassengerBone != null) {
+                this.cachedBoneWorldPosVector3d = this.cachedPassengerBone.getWorldPosition();
+                this.cachedBoneWorldPosVec3 = new Vec3(this.cachedBoneWorldPosVector3d.x(), this.cachedBoneWorldPosVector3d.y(), this.cachedBoneWorldPosVector3d.z());
+                this.foundPassengerBonePosThisPass = true;
+            }
+            entity.updateLocationForPassengerBone(this.foundPassengerBonePosThisPass, this.cachedBoneWorldPosVec3);
         }
     }
 

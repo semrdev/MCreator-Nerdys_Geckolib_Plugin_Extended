@@ -34,7 +34,7 @@ public interface IGeckoLibEntity {
 
     public void offsetBoneUVs(String bones, float uOffset, float vOffset);
 
-    public void setPassengerOffset(double x, double y, double z, String boneName);
+    public void setPassengerOffset(double x, double y, double z, String boneName, double boneOX, double boneOY, double boneOZ);
 
     public void resetPassengerOffset();
 

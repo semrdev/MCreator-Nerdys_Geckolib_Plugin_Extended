@@ -1345,19 +1345,8 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		}
 	}
 
-	private boolean overridePassengerOffset = false;
-	public String passengerBoneName = "";
-    private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
-
     private EntityRenderer<?> cachedEntityRenderer;
     private ${name}Renderer cached${name}Renderer;
-
-    private GeoBone cachedPassengerBone;
-    private GeoModel<?> cachedGeoModel;
-    private Vector3d cachedBoneWorldPosVector3d;
-    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
-    private Vec3 cachedPassengerOffset = new Vec3(0.0D, 0.0D, 0.0D);
-    private Vec3 cachedPassengerPosition = new Vec3(0.0D, 0.0D, 0.0D);
 
     private ${name}Renderer getAndCacheEntityRenderer() {
         if (level().isClientSide) {
@@ -1432,17 +1421,33 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         return null;
     }
 
+	private boolean overridePassengerOffset = false;
+	public String passengerBoneName = "";
+    private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
+    private double passengerBoneOffsetX = 0.0D, passengerBoneOffsetY = 0.0D, passengerBoneOffsetZ = 0.0D;
+
+    private boolean bonePosFound = false;
+    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
+
+    private Vec3 cachedPassengerOffset = new Vec3(0.0D, 0.0D, 0.0D);
+    private Vec3 cachedPassengerPosition = new Vec3(0.0D, 0.0D, 0.0D);
+
 	// Functions for changing the passenger ride attachment point.
 	// This is useful for entities with a seat in a specific location,
 	// or even something where the seat moves as the entity animations
 	// (like a wavy flying eastern style dragon).
 	@Override
-	public void setPassengerOffset(double x, double y, double z, String boneName) {
+	public void setPassengerOffset(double x, double y, double z, String boneName, double boneOX, double boneOY, double boneOZ) {
         this.overridePassengerOffset = true;
+        this.bonePosFound = false;
 
         this.passengerOffsetX = x;
         this.passengerOffsetY = y;
         this.passengerOffsetZ = z;
+
+        this.passengerBoneOffsetX = boneOX;
+        this.passengerBoneOffsetY = boneOY;
+        this.passengerBoneOffsetZ = boneOZ;
 
         this.passengerBoneName = boneName;
 	}
@@ -1451,44 +1456,37 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	public void resetPassengerOffset() {
         this.overridePassengerOffset = false;
         this.passengerBoneName = "";
+        this.bonePosFound = false;
     }
 
-    private Vec3 calculatePassengerPosition() {
-        this.cachedPassengerOffset = new Vec3(this.passengerOffsetX, this.passengerOffsetY, passengerOffsetZ);
-        this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
-
-        if (level().isClientSide) {
-            this.cached${name}Renderer = getAndCacheEntityRenderer();
-
-            if (this.cached${name}Renderer != null) {
-                // Access the GeckoLib model bone
-                this.cachedGeoModel = this.cached${name}Renderer.getGeoModel();
-                if (this.cachedGeoModel != null) {
-                    this.cachedPassengerBone = this.cachedGeoModel.getBone(this.passengerBoneName).orElse(null);
-                    if (this.cachedPassengerBone != null) {
-                        this.cachedBoneWorldPosVector3d = this.cachedPassengerBone.getWorldPosition();
-                        this.cachedBoneWorldPosVec3 = new Vec3(this.cachedBoneWorldPosVector3d.x(), this.cachedBoneWorldPosVector3d.y(), this.cachedBoneWorldPosVector3d.z());
-
-                        this.cachedPassengerPosition = this.cachedBoneWorldPosVec3.add(this.cachedPassengerOffset);
-                        return this.cachedPassengerPosition;
-                    }
-                }
-            }
+    // Called by renderer to sync the latest
+    public void updateLocationForPassengerBone(boolean bonePosFound, Vec3 bonePos) {
+        this.bonePosFound = bonePosFound;
+        if (this.bonePosFound) {
+            this.cachedBoneWorldPosVec3 = bonePos;
         }
-        this.cachedPassengerPosition = this.position().add(this.cachedPassengerOffset);
+    }
+
+    private Vec3 getPassengerPosition() {
+        if (this.bonePosFound) {
+            this.cachedPassengerOffset = new Vec3(this.passengerBoneOffsetX, this.passengerBoneOffsetY, passengerBoneOffsetZ);
+            this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
+            this.cachedPassengerPosition = this.cachedBoneWorldPosVec3.add(this.cachedPassengerOffset);
+        }
+        else {
+            this.cachedPassengerOffset = new Vec3(this.passengerOffsetX, this.passengerOffsetY, passengerOffsetZ);
+            this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
+            this.cachedPassengerPosition = this.position().add(this.cachedPassengerOffset);
+        }
+
         return this.cachedPassengerPosition;
     }
 
     @Override
     protected void positionRider(Entity passenger, Entity.MoveFunction moveFn) {
         if (this.overridePassengerOffset) {
-            if (level().isClientSide) {
-                calculatePassengerPosition();
-                moveFn.accept(passenger, this.cachedPassengerPosition.x(), this.cachedPassengerPosition.y(), this.cachedPassengerPosition.z());
-            } else {
-                calculatePassengerPosition();
-                moveFn.accept(passenger, this.cachedPassengerPosition.x(), this.cachedPassengerPosition.y(), this.cachedPassengerPosition.z());
-            }
+            this.cachedPassengerPosition = getPassengerPosition();
+            moveFn.accept(passenger, this.cachedPassengerPosition.x(), this.cachedPassengerPosition.y(), this.cachedPassengerPosition.z());
         } else {
             super.positionRider(passenger, moveFn);
         }
@@ -1497,11 +1495,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
         if (this.overridePassengerOffset) {
-            if (level().isClientSide) {
-                return calculatePassengerPosition();
-            } else {
-                return calculatePassengerPosition();
-            }
+            return this.cachedPassengerPosition;
         } else {
             return super.getDismountLocationForPassenger(passenger);
         }
