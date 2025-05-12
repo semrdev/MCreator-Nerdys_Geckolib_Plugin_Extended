@@ -1,0 +1,1 @@
+(Minecraft.getInstance().getCameraType() == CameraType.${input$camType})
