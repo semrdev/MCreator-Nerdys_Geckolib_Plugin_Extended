@@ -1454,7 +1454,10 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	@Override
 	public void setPassengerOffset(double x, double y, double z, String boneName, double boneOX, double boneOY, double boneOZ) {
         this.overridePassengerOffset = true;
-        this.bonePosFound = false;
+
+        if (this.passengerBoneName != boneName) {
+            this.bonePosFound = false;
+        }
 
         this.passengerOffsetX = x;
         this.passengerOffsetY = y;
@@ -1533,7 +1536,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		<#if data.enable4>
 		data.add(new AnimationController<>(this, "attacking", ${data.lerp}, this::attackingPredicate));
 		</#if>
-                data.add(new AnimationController<>(this, "procedure", ${data.lerp}, this::procedurePredicate));
+        data.add(new AnimationController<>(this, "procedure", ${data.lerp}, this::procedurePredicate));
 	}
 
 	@Override
