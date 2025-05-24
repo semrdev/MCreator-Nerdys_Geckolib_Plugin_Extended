@@ -1530,13 +1530,99 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
         return this.isSitting;
     }
 
+    <#if hasProcedure(data.onAnimationEffect)>
+    private class ASoundKeyframeHandler implements AnimationController.SoundKeyframeHandler<${name}Entity> {
+        private ${name}Entity entity;
+
+        public ASoundKeyframeHandler(${name}Entity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public void handle(SoundKeyframeEvent event) {
+            <@procedureCode data.onAnimationEffect, {
+                "x": "this.entity.getX()",
+                "y": "this.entity.getY()",
+                "z": "this.entity.getZ()",
+                "entity": "this.entity",
+                "world": "this.entity.level()",
+                "type": "\"Sound\"",
+                "effect": "event.getKeyframeData().getSound()",
+                "locator": "\"\"",
+                "script": "\"\""
+                }/>
+        }
+    }
+
+    private class AParticleKeyframeHandler implements AnimationController.ParticleKeyframeHandler<${name}Entity> {
+        private ${name}Entity entity;
+
+        public AParticleKeyframeHandler(${name}Entity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public void handle(ParticleKeyframeEvent event) {
+            <@procedureCode data.onAnimationEffect, {
+                "x": "this.entity.getX()",
+                "y": "this.entity.getY()",
+                "z": "this.entity.getZ()",
+                "entity": "this.entity",
+                "world": "this.entity.level()",
+                "type": "\"Particle\"",
+                "effect": "event.getKeyframeData().getEffect()",
+                "locator": "event.getKeyframeData().getLocator()",
+                "script": "event.getKeyframeData().script()"
+                }/>
+        }
+    }
+
+    private class ACustomKeyframeHandler implements AnimationController.CustomKeyframeHandler<${name}Entity> {
+        private ${name}Entity entity;
+
+        public ACustomKeyframeHandler(${name}Entity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public void handle(CustomInstructionKeyframeEvent event) {
+            <@procedureCode data.onAnimationEffect, {
+                "x": "this.entity.getX()",
+                "y": "this.entity.getY()",
+                "z": "this.entity.getZ()",
+                "entity": "this.entity",
+                "world": "this.entity.level()",
+                "type": "\"Instructions\"",
+                "effect": "\"\"",
+                "locator": "\"\"",
+                "script": "event.getKeyframeData().getInstructions()"
+                }/>
+        }
+    }
+    </#if>
+
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar data) {
-		data.add(new AnimationController<>(this, "movement", ${data.lerp}, this::movementPredicate));
+		data.add(new AnimationController<>(this, "movement", ${data.lerp}, this::movementPredicate)
+        <#if hasProcedure(data.onAnimationEffect)>
+        .setSoundKeyframeHandler(new ASoundKeyframeHandler(this))
+        .setParticleKeyframeHandler(new AParticleKeyframeHandler(this))
+        .setCustomInstructionKeyframeHandler(new ACustomKeyframeHandler(this))</#if>
+		);
 		<#if data.enable4>
-		data.add(new AnimationController<>(this, "attacking", ${data.lerp}, this::attackingPredicate));
+		data.add(new AnimationController<>(this, "attacking", ${data.lerp}, this::attackingPredicate)
+        <#if hasProcedure(data.onAnimationEffect)>
+        .setSoundKeyframeHandler(new ASoundKeyframeHandler(this))
+        .setParticleKeyframeHandler(new AParticleKeyframeHandler(this))
+        .setCustomInstructionKeyframeHandler(new ACustomKeyframeHandler(this))</#if>
+		);
 		</#if>
-        data.add(new AnimationController<>(this, "procedure", ${data.lerp}, this::procedurePredicate));
+        data.add(new AnimationController<>(this, "procedure", ${data.lerp}, this::procedurePredicate)
+        <#if hasProcedure(data.onAnimationEffect)>
+        .setSoundKeyframeHandler(new ASoundKeyframeHandler(this))
+        .setParticleKeyframeHandler(new AParticleKeyframeHandler(this))
+        .setCustomInstructionKeyframeHandler(new ACustomKeyframeHandler(this))</#if>
+		);
 	}
 
 	@Override

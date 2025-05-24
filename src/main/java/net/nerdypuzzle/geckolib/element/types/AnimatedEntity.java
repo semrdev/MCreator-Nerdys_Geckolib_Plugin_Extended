@@ -133,6 +133,7 @@ public class AnimatedEntity extends GeneratableElement
     public Procedure onPlayerCollidesWith;
     public Procedure onInitialSpawn;
     public Procedure finishedDying;
+    public Procedure onAnimationEffect;
 
     public boolean hasAI;
     public String aiBase;

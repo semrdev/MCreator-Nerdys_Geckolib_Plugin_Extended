@@ -66,6 +66,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private ProcedureSelector onMobTickUpdate;
     private ProcedureSelector onPlayerCollidesWith;
     private ProcedureSelector onInitialSpawn;
+    private ProcedureSelector onAnimationEffect;
 
     private ProcedureSelector spawningCondition;
     public NumberProcedureSelector visualScale;
@@ -335,6 +336,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         finishedDying = new ProcedureSelector(this.withEntry("geckolib/finished_dying"), mcreator,
                 L10N.t("elementgui.animatedentity.finished_dying"),
                 Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity"));
+        onAnimationEffect = new ProcedureSelector(this.withEntry("geckolib/on_animation_effect"), mcreator,
+                L10N.t("elementgui.animatedentity.on_animation_effect"),
+                Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity/type:string/effect:string/locator:string/script:string"));
 
         spawningCondition = new ProcedureSelector(this.withEntry("entity/condition_natural_spawning"), mcreator,
                 L10N.t("elementgui.living_entity.condition_natural_spawn"), VariableTypeLoader.BuiltInTypes.LOGIC,
@@ -781,6 +785,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         events.add(onMobTickUpdate);
         events.add(onPlayerCollidesWith);
         events.add(onInitialSpawn);
+        events.add(onAnimationEffect);
         events.setOpaque(false);
         pane4.add("Center", PanelUtils.totalCenterInPanel(events));
 
@@ -1143,7 +1148,8 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         onMobTickUpdate.refreshListKeepSelected();
         onPlayerCollidesWith.refreshListKeepSelected();
         onInitialSpawn.refreshListKeepSelected();
-        finishedDying.refreshListKeepSelected();;
+        finishedDying.refreshListKeepSelected();
+        onAnimationEffect.refreshListKeepSelected();
 
         spawningCondition.refreshListKeepSelected();
         visualScale.refreshListKeepSelected();
@@ -1243,6 +1249,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         onMobTickUpdate.setSelectedProcedure(livingEntity.onMobTickUpdate);
         onPlayerCollidesWith.setSelectedProcedure(livingEntity.onPlayerCollidesWith);
         onInitialSpawn.setSelectedProcedure(livingEntity.onInitialSpawn);
+        onAnimationEffect.setSelectedProcedure(livingEntity.onAnimationEffect);
         renderType.setSelectedItem(livingEntity.renderType);
         mainHandItemBone.setText(livingEntity.mainHandItemBone);
         offHandItemBone.setText(livingEntity.offHandItemBone);
@@ -1480,6 +1487,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.onMobTickUpdate = onMobTickUpdate.getSelectedProcedure();
         livingEntity.onPlayerCollidesWith = onPlayerCollidesWith.getSelectedProcedure();
         livingEntity.onInitialSpawn = onInitialSpawn.getSelectedProcedure();
+        livingEntity.onAnimationEffect = onAnimationEffect.getSelectedProcedure();
         livingEntity.hasAI = hasAI.isSelected();
         livingEntity.aiBase = (String) aiBase.getSelectedItem();
         livingEntity.aixml = blocklyPanel.getXML();
