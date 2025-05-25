@@ -1,3 +1,3 @@
 if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
-geckoLibEntity.setAnimation("empty");
+geckoLibEntity.setPassengerIsSitting(${input$isSitting});
 }

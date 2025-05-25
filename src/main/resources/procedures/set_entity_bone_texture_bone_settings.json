@@ -2,12 +2,17 @@
   "args0": [
     {
       "type": "input_value",
+      "name": "layerKey",
+      "check": "String"
+    },
+    {
+      "type": "input_value",
       "name": "bone",
       "check": "String"
     },
     {
       "type": "input_value",
-      "name": "visible",
+      "name": "hidden",
       "check": "Boolean"
     },
     {
@@ -37,13 +42,15 @@
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
+      "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
       "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
-      "<value name=\"visible\"><block type=\"logic_boolean\"><field name=\"BOOL\">FALSE</field></block></value>",
+      "<value name=\"hidden\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
+      "layerKey",
       "bone",
-      "visible",
+      "hidden",
       "entity"
     ],
     "fields": [

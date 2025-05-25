@@ -1,0 +1,1 @@
+The name of the bone that the OFFHAND item should be rendered in. Leave blank to not render offhand item anywhere.

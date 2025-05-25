@@ -1,3 +1,3 @@
 if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity) {
-geckoLibEntity.setAnimation("empty");
+    geckoLibEntity.removeRenderLayer(${input$layerKey});
 }

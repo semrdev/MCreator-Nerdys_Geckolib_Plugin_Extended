@@ -1,0 +1,1 @@
+(Minecraft.getInstance().options.getCameraType() == CameraType.${field$cameraType})

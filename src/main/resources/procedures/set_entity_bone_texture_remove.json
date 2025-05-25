@@ -2,28 +2,28 @@
   "args0": [
     {
       "type": "input_value",
-      "name": "animation",
+      "name": "layerKey",
       "check": "String"
     },
     {
-  "type": "input_value",
-  "name": "entity",
-  "check": "Entity"
+      "type": "input_value",
+      "name": "entity",
+      "check": "Entity"
     }
   ],
-  "inputsInline": true,
+  "inputsInline": false,
   "previousStatement": null,
   "nextStatement": null,
   "colour": "364",
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"animation\"><block type=\"text\"><field name=\"TEXT\">animation</field></block></value>",
+      "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
-     "animation",
-     "entity"
+      "layerKey",
+      "entity"
     ]
   }
 }

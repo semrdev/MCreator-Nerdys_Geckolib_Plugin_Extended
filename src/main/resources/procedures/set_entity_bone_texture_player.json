@@ -2,25 +2,29 @@
   "args0": [
     {
       "type": "input_value",
-      "name": "bone",
+      "name": "layerKey",
       "check": "String"
     },
     {
       "type": "input_value",
-      "name": "visible",
-      "check": "Boolean"
+      "name": "player",
+      "check": "Entity"
     },
     {
       "type": "field_dropdown",
-      "name": "recursive",
+      "name": "renderType",
       "options": [
         [
-          "child bones too",
-          "TRUE"
+          "TRANSLUCENT",
+          "TRANSLUCENT"
         ],
         [
-          "only listed bones",
-          "FALSE"
+          "UNLIT_TRANSLUCENT",
+          "UNLIT_TRANSLUCENT"
+        ],
+        [
+          "GLOW",
+          "GLOW"
         ]
       ]
     },
@@ -37,17 +41,17 @@
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
-      "<value name=\"visible\"><block type=\"logic_boolean\"><field name=\"BOOL\">FALSE</field></block></value>",
+      "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
+      "<value name=\"player\"><block type=\"source_entity_from_deps\"></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
-      "bone",
-      "visible",
+      "layerKey",
+      "player",
       "entity"
     ],
     "fields": [
-      "recursive"
+      "renderType"
     ]
   }
 }

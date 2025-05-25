@@ -2,13 +2,8 @@
   "args0": [
     {
       "type": "input_value",
-      "name": "animation",
-      "check": "String"
-    },
-    {
-  "type": "input_value",
-  "name": "entity",
-  "check": "Entity"
+      "name": "entity",
+      "check": "Entity"
     }
   ],
   "inputsInline": true,
@@ -18,12 +13,10 @@
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"animation\"><block type=\"text\"><field name=\"TEXT\">animation</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
-     "animation",
-     "entity"
+      "entity"
     ]
   }
 }

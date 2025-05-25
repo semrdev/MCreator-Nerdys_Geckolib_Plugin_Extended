@@ -7,22 +7,13 @@
     },
     {
       "type": "input_value",
-      "name": "visible",
-      "check": "Boolean"
+      "name": "uOffset",
+      "check": "Number"
     },
     {
-      "type": "field_dropdown",
-      "name": "recursive",
-      "options": [
-        [
-          "child bones too",
-          "TRUE"
-        ],
-        [
-          "only listed bones",
-          "FALSE"
-        ]
-      ]
+      "type": "input_value",
+      "name": "vOffset",
+      "check": "Number"
     },
     {
       "type": "input_value",
@@ -30,7 +21,7 @@
       "check": "Entity"
     }
   ],
-  "inputsInline": false,
+  "inputsInline": true,
   "previousStatement": null,
   "nextStatement": null,
   "colour": "364",
@@ -38,16 +29,15 @@
     "toolbox_id": "geckolib",
     "toolbox_init": [
       "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
-      "<value name=\"visible\"><block type=\"logic_boolean\"><field name=\"BOOL\">FALSE</field></block></value>",
+      "<value name=\"uOffset\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
+      "<value name=\"vOffset\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
       "bone",
-      "visible",
+      "uOffset",
+      "vOffset",
       "entity"
-    ],
-    "fields": [
-      "recursive"
     ]
   }
 }

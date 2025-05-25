@@ -1,1 +1,1 @@
-(${input$entity} instanceof ${(field$element)?replace("CUSTOM:", "")}Entity animatable ? animatable.getTexture() : "null")
+(${input$entity} instanceof IGeckoLibEntity geckoLibEntity ? geckoLibEntity.getTexture() : "null")

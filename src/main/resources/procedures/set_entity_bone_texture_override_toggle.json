@@ -2,13 +2,13 @@
   "args0": [
     {
       "type": "input_value",
-      "name": "animType",
+      "name": "layerKey",
       "check": "String"
     },
     {
       "type": "input_value",
-      "name": "animOverride",
-      "check": "String"
+      "name": "override",
+      "check": "Boolean"
     },
     {
       "type": "input_value",
@@ -16,20 +16,20 @@
       "check": "Entity"
     }
   ],
-  "inputsInline": true,
+  "inputsInline": false,
   "previousStatement": null,
   "nextStatement": null,
   "colour": "364",
   "mcreator": {
     "toolbox_id": "geckolib",
     "toolbox_init": [
-      "<value name=\"animType\"><block type=\"text\"><field name=\"TEXT\">IDLE</field></block></value>",
-      "<value name=\"animOverride\"><block type=\"text\"><field name=\"TEXT\">sit</field></block></value>",
+      "<value name=\"layerKey\"><block type=\"text\"><field name=\"TEXT\">layer name</field></block></value>",
+      "<value name=\"override\"><block type=\"logic_boolean\"><field name=\"BOOL\">TRUE</field></block></value>",
       "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
     ],
     "inputs": [
-      "animType",
-      "animOverride",
+      "layerKey",
+      "override",
       "entity"
     ]
   }

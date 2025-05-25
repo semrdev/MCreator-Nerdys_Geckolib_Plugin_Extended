@@ -1,2 +1,2 @@
-if (${input$entity} instanceof ${(field$element)?replace("CUSTOM:", "")}Entity animatable)
-	animatable.setTexture(${input$texture});
+if (${input$entity} instanceof IGeckoLibEntity geckoLibEntity)
+	geckoLibEntity.setTexture(${input$texture});

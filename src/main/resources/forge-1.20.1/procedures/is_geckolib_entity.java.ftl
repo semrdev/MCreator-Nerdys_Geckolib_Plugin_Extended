@@ -1,1 +1,1 @@
-(${input$entity} instanceof GeoEntity)
+(${input$entity} instanceof IGeckoLibEntity)

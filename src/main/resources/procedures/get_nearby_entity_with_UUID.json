@@ -1,0 +1,49 @@
+{
+ "args0": [
+    {
+      "type": "input_value",
+      "name": "uuid",
+      "check": "String"
+    },
+    {
+      "type": "input_value",
+      "name": "radius",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "x",
+      "check": "Number"
+    },
+   {
+     "type": "input_value",
+     "name": "y",
+     "check": "Number"
+   },
+   {
+     "type": "input_value",
+     "name": "z",
+     "check": "Number"
+   }
+  ],
+    "inputsInline": false,
+    "output": "Entity",
+    "colour": 364,
+    "mcreator": {
+      "toolbox_id": "geckolibutils",
+      "toolbox_init": [
+        "<value name=\"uuid\"><block type=\"text\"><field name=\"TEXT\"></field></block></value>",
+        "<value name=\"radius\"><block type=\"math_number\"><field name=\"NUM\">16</field></block></value>",
+        "<value name=\"x\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
+        "<value name=\"y\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>",
+        "<value name=\"z\"><block type=\"math_number\"><field name=\"NUM\">0</field></block></value>"
+      ],
+      "inputs": [
+        "uuid",
+        "radius",
+        "x",
+        "y",
+        "z"
+      ]
+    }
+}

@@ -43,6 +43,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.*;
 
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -65,7 +66,7 @@ import net.nerdypuzzle.geckolib.element.types.AnimatedEntity;
 	<#assign extendsClass = "TamableAnimal">
 </#if>
 
-public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity<#else>implements GeoEntity</#if> {
+public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity, IGeckoLibEntity<#else>implements GeoEntity, IGeckoLibEntity</#if> {
     public static final EntityDataAccessor<Boolean> SHOOT = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(
@@ -87,7 +88,11 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	private boolean swinging;
 	private boolean lastloop;
 	private long lastSwing;
-        public String animationprocedure = "empty";
+    public String animationprocedure = "empty";
+	@Override
+	public String getProcedureAnimation() {
+	    return this.animationprocedure;
+	}
 	<#if data.isBoss>
 	private final ServerBossEvent bossInfo = new ServerBossEvent(this.getDisplayName(),
 		ServerBossEvent.BossBarColor.${data.bossBarColor}, ServerBossEvent.BossBarOverlay.${data.bossBarType});
@@ -222,10 +227,12 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		</#if>
 	}
 
+    @Override
 	public void setTexture(String texture) {
 		this.entityData.set(TEXTURE, texture);
 	}
 
+    @Override
 	public String getTexture() {
 		return this.entityData.get(TEXTURE);
 	}
@@ -879,7 +886,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	}
 	</#if>
 
-    <#if data.ridable && (data.canControlForward || data.canControlStrafe)>
+    <#if data.canControlForward || data.canControlStrafe>
         @Override public void travel(Vec3 dir) {
         	<#if data.canControlForward || data.canControlStrafe>
 			Entity entity = this.getPassengers().isEmpty() ? null : (Entity) this.getPassengers().get(0);
@@ -1125,6 +1132,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 	private OverridableAnimation animation9 = new OverridableAnimation("${data.animation9}");
 	private OverridableAnimation animation10 = new OverridableAnimation("${data.animation10}");
 
+    @Override
 	public void overrideAnimation(String animationType, String animID) {
 		String animationTypeProcessed = animationType.toUpperCase().replace(" ", "").replace("_", "").replace("ANIMATION", "");
 		if ("1" == animationTypeProcessed ||
@@ -1244,7 +1252,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		if (<#if data.ranged>(</#if>this.swinging<#if data.ranged> || this.entityData.get(SHOOT))</#if>
 		&& event.getController().getAnimationState() == AnimationController.State.STOPPED) {
 			event.getController().forceAnimationReset();
-			return event.setAndContinue(RawAnimation.begin().thenPlay(this.animation4.getAnim()));
+			return event.setAndContinue(RawAnimation.begin().then(this.animation4.getAnim(), Animation.LoopType.PLAY_ONCE));
 		}
 	return PlayState.CONTINUE;
    	}
@@ -1291,40 +1299,331 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 		return this.entityData.get(ANIMATION);
 	}
 
+    @Override
 	public void setAnimation(String animation) {
 		this.entityData.set(ANIMATION, animation);
 	}
 
-	public Set<String> hiddenBones;
-	public Set<String> shownBones;
-	public void toggleModelBones(String bones, Boolean visible) {
+	// A hash map for storing hidden bones.
+	// Bone name is the access key, recursive hiding is the value
+    public final Map<String, Boolean> hiddenBones = new HashMap<>();
+
+    @Override
+	public void toggleModelBones(String bones, Boolean visible, Boolean recursive) {
 		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
 
-		if (hiddenBones == null) {
-			hiddenBones = new HashSet<String>();
-		}
+        for (String bone : boneArray) {
+            if (visible) {
+                this.hiddenBones.remove(bone);
+            }
+            else {
+                this.hiddenBones.put(bone, recursive);
+            }
+        }
+	}
 
-		if (shownBones == null) {
-			shownBones = new HashSet<String>();
-		}
+	// A custom record for storing the bone UV offsets inside a hash map.
+	public record BoneUVOffset(float uOffset, float vOffset) {}
 
-		if (visible) {
-			hiddenBones.removeAll(Arrays.asList(boneArray));
-			shownBones.addAll(Arrays.asList(boneArray));
-		}
-		else {
-			shownBones.removeAll(Arrays.asList(boneArray));
-			hiddenBones.addAll(Arrays.asList(boneArray));
+	// A hash map for storing any bone UV offset customizations, with the bone names as the access keys.
+	// Accessed by the entity's renderer class while rendering the bones of the model.
+	public final Map<String, BoneUVOffset> boneUVOffsets = new HashMap<>();
+
+	// Function that is called by procedure blocks to add or remove bone UV offsets.
+	// If uOffset and vOffset are both 0, the bone is removed from the hash map to save processing cycles in the renderer.
+	@Override
+	public void offsetBoneUVs(String bones, float uOffset, float vOffset) {
+		String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+
+		Boolean removeFromHashMap = (uOffset == 0 && vOffset == 0);
+
+		for (String boneName : boneArray) {
+			if (boneUVOffsets.containsKey(boneName) && removeFromHashMap) {
+				boneUVOffsets.remove(boneName);
+			} else if (!removeFromHashMap) {
+				boneUVOffsets.put(boneName, new BoneUVOffset(uOffset, vOffset));
+			}
 		}
 	}
 
+    private EntityRenderer<?> cachedEntityRenderer;
+    private ${name}Renderer cached${name}Renderer;
+
+    private ${name}Renderer getAndCacheEntityRenderer() {
+        if (level().isClientSide) {
+            this.cachedEntityRenderer = Minecraft.getInstance()
+                                                 .getEntityRenderDispatcher()
+                                                 .getRenderer(this);
+            if (this.cachedEntityRenderer instanceof ${name}Renderer cached${name}Renderer) {
+                this.cached${name}Renderer = cached${name}Renderer;
+                return this.cached${name}Renderer;
+            }
+        }
+        return null;
+    }
+
+    // A hash map for storing the custom texture override render layers applied to this entity's renderer.
+    public final Map<String, BoneTextureLayer> boneTextureLayers = new HashMap<>();
+
+    private GeoBone cachedGeoBone;
+    private ResourceLocation cachedResourceLoc;
+
+    @Override
+    public void addOrModifyTextureRenderLayer(String layerKey, String texture, String renderType) {
+        this.cached${name}Renderer = getAndCacheEntityRenderer();
+        this.cachedResourceLoc = new ResourceLocation("${modid}", "textures/entities/" + texture + ".png");
+
+        this.processTextureLayerUpdate(layerKey, renderType);
+    }
+
+    @Override
+    public void addOrModifyPlayerRenderLayer(String layerKey, Player player, String renderType) {
+        if (player != null) {
+            this.cached${name}Renderer = getAndCacheEntityRenderer();
+            this.cachedResourceLoc = getPlayerSkin(player);
+            this.processTextureLayerUpdate(layerKey, renderType);
+        }
+    }
+
+    private void processTextureLayerUpdate(String layerKey, String renderType) {
+        if (this.cached${name}Renderer != null && this.cachedResourceLoc != null) {
+
+            BoneTextureLayer textureLayer;
+            if (this.boneTextureLayers.containsKey(layerKey)) {
+                textureLayer = this.boneTextureLayers.get(layerKey);
+                textureLayer.setTextureAndRenderType(this.cachedResourceLoc, renderType);
+            }
+            else {
+                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, renderType);
+                this.boneTextureLayers.put(layerKey, textureLayer);
+            }
+        }
+    }
+
+    @Override
+    public void setRenderLayerOverridesBoneToggles(String layerKey, Boolean override) {
+        if (this.boneTextureLayers.containsKey(layerKey)) {
+            BoneTextureLayer textureLayer = this.boneTextureLayers.get(layerKey);
+            textureLayer.toggleOverrideDefaultBoneSettings(override);
+        }
+    }
+
+    @Override
+    public void setRenderLayerBoneSettings(String layerKey, String bones, Boolean hide, Boolean recursive) {
+        if (this.boneTextureLayers.containsKey(layerKey)) {
+            BoneTextureLayer textureLayer = this.boneTextureLayers.get(layerKey);
+            textureLayer.toggleLayerBones(bones, !hide, recursive);
+        }
+    }
+
+    @Override
+    public void removeRenderLayer(String layerKey) {
+        this.boneTextureLayers.remove(layerKey);
+    }
+
+    private ResourceLocation getPlayerSkin(Player player) {
+        if (player != null && player.getGameProfile() != null) {
+            Minecraft mc = Minecraft.getInstance();
+            SkinManager skinManager = mc.getSkinManager();
+                if (skinManager != null) {
+                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures =
+                    skinManager.getInsecureSkinInformation(player.getGameProfile());
+                    if (textures.containsKey(MinecraftProfileTexture.Type.SKIN)) {
+                        return skinManager.registerTexture(textures.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+                    }
+                }
+                return DefaultPlayerSkin.getDefaultSkin(player.getUUID());
+            }
+        return null;
+    }
+
+	private boolean overridePassengerOffset = false;
+	public String passengerBoneName = "";
+    private double passengerOffsetX = 0.0D, passengerOffsetY = 0.0D, passengerOffsetZ = 0.0D;
+    private double passengerBoneOffsetX = 0.0D, passengerBoneOffsetY = 0.0D, passengerBoneOffsetZ = 0.0D;
+
+    private boolean bonePosFound = false;
+    private Vec3 cachedBoneWorldPosVec3 = new Vec3(0.0D, 0.0D, 0.0D);
+
+    private Vec3 cachedPassengerOffset = new Vec3(0.0D, 0.0D, 0.0D);
+    private Vec3 cachedPassengerPosition = new Vec3(0.0D, 0.0D, 0.0D);
+
+	// Functions for changing the passenger ride attachment point.
+	// This is useful for entities with a seat in a specific location,
+	// or even something where the seat moves as the entity animations
+	// (like a wavy flying eastern style dragon).
+	@Override
+	public void setPassengerOffset(double x, double y, double z, String boneName, double boneOX, double boneOY, double boneOZ) {
+        this.overridePassengerOffset = true;
+
+        if (this.passengerBoneName != boneName) {
+            this.bonePosFound = false;
+        }
+
+        this.passengerOffsetX = x;
+        this.passengerOffsetY = y;
+        this.passengerOffsetZ = z;
+
+        this.passengerBoneOffsetX = boneOX;
+        this.passengerBoneOffsetY = boneOY;
+        this.passengerBoneOffsetZ = boneOZ;
+
+        this.passengerBoneName = boneName;
+	}
+
+    @Override
+	public void resetPassengerOffset() {
+        this.overridePassengerOffset = false;
+        this.passengerBoneName = "";
+        this.bonePosFound = false;
+    }
+
+    // Called by renderer to sync the latest
+    public void updateLocationForPassengerBone(boolean bonePosFound, Vec3 bonePos) {
+        this.bonePosFound = bonePosFound;
+        if (this.bonePosFound) {
+            this.cachedBoneWorldPosVec3 = bonePos;
+        }
+    }
+
+    private Vec3 getPassengerPosition() {
+        if (this.bonePosFound) {
+            this.cachedPassengerOffset = new Vec3(this.passengerBoneOffsetX, this.passengerBoneOffsetY, passengerBoneOffsetZ);
+            this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
+            this.cachedPassengerPosition = this.cachedBoneWorldPosVec3.add(this.cachedPassengerOffset);
+        }
+        else {
+            this.cachedPassengerOffset = new Vec3(this.passengerOffsetX, this.passengerOffsetY, passengerOffsetZ);
+            this.cachedPassengerOffset = this.cachedPassengerOffset.yRot((float) -Math.toRadians(this.getYRot())); // Apply world-space rotation
+            this.cachedPassengerPosition = this.position().add(this.cachedPassengerOffset);
+        }
+
+        return this.cachedPassengerPosition;
+    }
+
+    @Override
+    protected void positionRider(Entity passenger, Entity.MoveFunction moveFn) {
+        if (this.overridePassengerOffset) {
+            this.cachedPassengerPosition = getPassengerPosition();
+            moveFn.accept(passenger, this.cachedPassengerPosition.x(), this.cachedPassengerPosition.y(), this.cachedPassengerPosition.z());
+        } else {
+            super.positionRider(passenger, moveFn);
+        }
+    }
+
+    @Override
+    public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
+        if (this.overridePassengerOffset) {
+            return this.cachedPassengerPosition;
+        } else {
+            return super.getDismountLocationForPassenger(passenger);
+        }
+    }
+
+    private boolean isSitting = true;
+    @Override
+    public void setPassengerIsSitting(boolean isSitting) {
+        this.isSitting = isSitting;
+    }
+
+    @Override
+    public boolean shouldRiderSit() {
+        return this.isSitting;
+    }
+
+    <#if hasProcedure(data.onAnimationEffect)>
+    private class ASoundKeyframeHandler implements AnimationController.SoundKeyframeHandler<${name}Entity> {
+        private ${name}Entity entity;
+
+        public ASoundKeyframeHandler(${name}Entity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public void handle(SoundKeyframeEvent event) {
+            <@procedureCode data.onAnimationEffect, {
+                "x": "this.entity.getX()",
+                "y": "this.entity.getY()",
+                "z": "this.entity.getZ()",
+                "entity": "this.entity",
+                "world": "this.entity.level()",
+                "type": "\"Sound\"",
+                "effect": "event.getKeyframeData().getSound()",
+                "locator": "\"\"",
+                "script": "\"\""
+                }/>
+        }
+    }
+
+    private class AParticleKeyframeHandler implements AnimationController.ParticleKeyframeHandler<${name}Entity> {
+        private ${name}Entity entity;
+
+        public AParticleKeyframeHandler(${name}Entity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public void handle(ParticleKeyframeEvent event) {
+            <@procedureCode data.onAnimationEffect, {
+                "x": "this.entity.getX()",
+                "y": "this.entity.getY()",
+                "z": "this.entity.getZ()",
+                "entity": "this.entity",
+                "world": "this.entity.level()",
+                "type": "\"Particle\"",
+                "effect": "event.getKeyframeData().getEffect()",
+                "locator": "event.getKeyframeData().getLocator()",
+                "script": "event.getKeyframeData().script()"
+                }/>
+        }
+    }
+
+    private class ACustomKeyframeHandler implements AnimationController.CustomKeyframeHandler<${name}Entity> {
+        private ${name}Entity entity;
+
+        public ACustomKeyframeHandler(${name}Entity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public void handle(CustomInstructionKeyframeEvent event) {
+            <@procedureCode data.onAnimationEffect, {
+                "x": "this.entity.getX()",
+                "y": "this.entity.getY()",
+                "z": "this.entity.getZ()",
+                "entity": "this.entity",
+                "world": "this.entity.level()",
+                "type": "\"Instructions\"",
+                "effect": "\"\"",
+                "locator": "\"\"",
+                "script": "event.getKeyframeData().getInstructions()"
+                }/>
+        }
+    }
+    </#if>
+
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar data) {
-		data.add(new AnimationController<>(this, "movement", ${data.lerp}, this::movementPredicate));
+		data.add(new AnimationController<>(this, "movement", ${data.lerp}, this::movementPredicate)
+        <#if hasProcedure(data.onAnimationEffect)>
+        .setSoundKeyframeHandler(new ASoundKeyframeHandler(this))
+        .setParticleKeyframeHandler(new AParticleKeyframeHandler(this))
+        .setCustomInstructionKeyframeHandler(new ACustomKeyframeHandler(this))</#if>
+		);
 		<#if data.enable4>
-		data.add(new AnimationController<>(this, "attacking", ${data.lerp}, this::attackingPredicate));
+		data.add(new AnimationController<>(this, "attacking", ${data.lerp}, this::attackingPredicate)
+        <#if hasProcedure(data.onAnimationEffect)>
+        .setSoundKeyframeHandler(new ASoundKeyframeHandler(this))
+        .setParticleKeyframeHandler(new AParticleKeyframeHandler(this))
+        .setCustomInstructionKeyframeHandler(new ACustomKeyframeHandler(this))</#if>
+		);
 		</#if>
-                data.add(new AnimationController<>(this, "procedure", ${data.lerp}, this::procedurePredicate));
+        data.add(new AnimationController<>(this, "procedure", ${data.lerp}, this::procedurePredicate)
+        <#if hasProcedure(data.onAnimationEffect)>
+        .setSoundKeyframeHandler(new ASoundKeyframeHandler(this))
+        .setParticleKeyframeHandler(new AParticleKeyframeHandler(this))
+        .setCustomInstructionKeyframeHandler(new ACustomKeyframeHandler(this))</#if>
+		);
 	}
 
 	@Override

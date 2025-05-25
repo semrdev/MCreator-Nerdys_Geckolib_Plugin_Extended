@@ -17,11 +17,11 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 dependencies {
     implementation project(':MCreator')
-    implementation fileTree(dir: 'C:/MCreator/lib', include: ['*.jar'])
+    implementation fileTree(dir: '/Applications/MCreator.app/Contents/lib', include: ['*.jar'])
 }
 
 tasks.jar {
-    archiveFileName.set("SMR_Geckolib_Plugin_08.zip")
+    archiveFileName.set("SMR_Geckolib_Plugin_19.zip")
 }
 
 tasks.register('runMCreatorWithPlugin', JavaExec) {

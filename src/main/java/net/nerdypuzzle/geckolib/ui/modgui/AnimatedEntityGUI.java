@@ -67,6 +67,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private ProcedureSelector onMobTickUpdate;
     private ProcedureSelector onPlayerCollidesWith;
     private ProcedureSelector onInitialSpawn;
+    private ProcedureSelector onAnimationEffect;
 
     private ProcedureSelector spawningCondition;
     public NumberProcedureSelector visualScale;
@@ -83,6 +84,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private final SoundSelector raidCelebrationSound = new SoundSelector(mcreator);
 
     private final VTextField mobName = new VTextField();
+
+    private final VTextField mainHandItemBone = new VTextField();
+    private final VTextField offHandItemBone = new VTextField();
+    public NumberProcedureSelector heldItemScale;
 
     private final JSpinner attackStrength = new JSpinner(new SpinnerNumberModel(3, 0, 10000, 1));
     private final JSpinner movementSpeed = new JSpinner(new SpinnerNumberModel(0.25, 0, 50, 0.1));
@@ -336,6 +341,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         finishedDying = new ProcedureSelector(this.withEntry("geckolib/finished_dying"), mcreator,
                 L10N.t("elementgui.animatedentity.finished_dying"),
                 Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity"));
+        onAnimationEffect = new ProcedureSelector(this.withEntry("geckolib/on_animation_effect"), mcreator,
+                L10N.t("elementgui.animatedentity.on_animation_effect"),
+                Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity/type:string/effect:string/locator:string/script:string"));
 
         spawningCondition = new ProcedureSelector(this.withEntry("entity/condition_natural_spawning"), mcreator,
                 L10N.t("elementgui.living_entity.condition_natural_spawn"), VariableTypeLoader.BuiltInTypes.LOGIC,
@@ -520,7 +528,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         entityDataListPanel.add(this.dataGroup);
         entityDataListPanel.add(entityDataListComp);
 
-        JPanel spo2 = new JPanel(new GridLayout(16, 2, 2, 2));
+        JPanel spo2 = new JPanel(new GridLayout(18, 2, 2, 2));
 
         spo2.setOpaque(false);
 
@@ -570,6 +578,22 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         spo2.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/render_type"),
                 L10N.label("elementgui.living_entity.render_type")));
         spo2.add(renderType);
+
+        spo2.add(
+                PanelUtils.join(FlowLayout.LEFT, L10N.label("elementgui.living_entity.item_render_bones"),
+                        HelpUtils.helpButton(this.withEntry("geckolib/main_hand_item_bone")),
+                        HelpUtils.helpButton(this.withEntry("geckolib/off_hand_item_bone"))));
+        spo2.add(PanelUtils.gridElements(1, 2, 2, 0, mainHandItemBone, offHandItemBone));
+
+        mainHandItemBone.setPreferredSize(new Dimension(250, 32));
+        offHandItemBone.setPreferredSize(new Dimension(250, 32));
+        heldItemScale = new NumberProcedureSelector(this.withEntry("geckolib/held_item_scale"), mcreator,
+                L10N.t("elementgui.animatedentity.held_item_scale"), AbstractProcedureSelector.Side.BOTH,
+                new JSpinner(new SpinnerNumberModel(1, 0.1, 1024, 0.1)), 300, Dependency.fromString(
+                "x:number/y:number/z:number/world:world/entity:entity"));
+
+        spo2.add(new JEmptyBox());
+        spo2.add(heldItemScale);
 
         ComponentUtils.deriveFont(mobModelTexture, 16);
         ComponentUtils.deriveFont(mobModelGlowTexture, 16);
@@ -772,6 +796,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         events.add(onMobTickUpdate);
         events.add(onPlayerCollidesWith);
         events.add(onInitialSpawn);
+        events.add(onAnimationEffect);
         events.setOpaque(false);
         pane4.add("Center", PanelUtils.totalCenterInPanel(events));
 
@@ -1134,12 +1159,14 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         onMobTickUpdate.refreshListKeepSelected();
         onPlayerCollidesWith.refreshListKeepSelected();
         onInitialSpawn.refreshListKeepSelected();
-        finishedDying.refreshListKeepSelected();;
+        finishedDying.refreshListKeepSelected();
+        onAnimationEffect.refreshListKeepSelected();
 
         spawningCondition.refreshListKeepSelected();
         visualScale.refreshListKeepSelected();
         boundingBoxScale.refreshListKeepSelected();
         solidBoundingBox.refreshListKeepSelected();
+        heldItemScale.refreshListKeepSelected();
 
         ComboBoxUtil.updateComboBoxContents(mobModelTexture, ListUtils.merge(Collections.singleton(""),
                 mcreator.getFolderManager().getTexturesList(TextureType.ENTITY).stream().map(File::getName)
@@ -1221,6 +1248,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         mobModelTexture.setSelectedItem(livingEntity.mobModelTexture);
         mobModelGlowTexture.setSelectedItem(livingEntity.mobModelGlowTexture);
         visualScale.setSelectedProcedure(livingEntity.visualScale);
+        heldItemScale.setSelectedProcedure(livingEntity.heldItemScale);
         boundingBoxScale.setSelectedProcedure(livingEntity.boundingBoxScale);
         solidBoundingBox.setSelectedProcedure(livingEntity.solidBoundingBox);
         mobSpawningType.setSelectedItem(livingEntity.mobSpawningType);
@@ -1237,7 +1265,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         onMobTickUpdate.setSelectedProcedure(livingEntity.onMobTickUpdate);
         onPlayerCollidesWith.setSelectedProcedure(livingEntity.onPlayerCollidesWith);
         onInitialSpawn.setSelectedProcedure(livingEntity.onInitialSpawn);
+        onAnimationEffect.setSelectedProcedure(livingEntity.onAnimationEffect);
         renderType.setSelectedItem(livingEntity.renderType);
+        mainHandItemBone.setText(livingEntity.mainHandItemBone);
+        offHandItemBone.setText(livingEntity.offHandItemBone);
         mobBehaviourType.setSelectedItem(livingEntity.mobBehaviourType);
         mobCreatureType.setSelectedItem(livingEntity.mobCreatureType);
         attackStrength.setValue(livingEntity.attackStrength);
@@ -1410,6 +1441,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.mobModelGlowTexture = mobModelGlowTexture.getSelectedItem();
         livingEntity.spawnEggBaseColor = spawnEggBaseColor.getColor();
         livingEntity.visualScale = visualScale.getSelectedProcedure();
+        livingEntity.heldItemScale = heldItemScale.getSelectedProcedure();
         livingEntity.boundingBoxScale = boundingBoxScale.getSelectedProcedure();
         livingEntity.solidBoundingBox = solidBoundingBox.getSelectedProcedure();
         livingEntity.spawnEggDotColor = spawnEggDotColor.getColor();
@@ -1426,6 +1458,8 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.equipmentLeggings = equipmentLeggings.getBlock();
         livingEntity.equipmentBoots = equipmentBoots.getBlock();
         livingEntity.renderType = (String) renderType.getSelectedItem();
+        livingEntity.mainHandItemBone = mainHandItemBone.getText();
+        livingEntity.offHandItemBone = offHandItemBone.getText();
         livingEntity.mobBehaviourType = (String) mobBehaviourType.getSelectedItem();
         livingEntity.mobCreatureType = (String) mobCreatureType.getSelectedItem();
         livingEntity.attackStrength = (int) attackStrength.getValue();
@@ -1471,6 +1505,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.onMobTickUpdate = onMobTickUpdate.getSelectedProcedure();
         livingEntity.onPlayerCollidesWith = onPlayerCollidesWith.getSelectedProcedure();
         livingEntity.onInitialSpawn = onInitialSpawn.getSelectedProcedure();
+        livingEntity.onAnimationEffect = onAnimationEffect.getSelectedProcedure();
         livingEntity.hasAI = hasAI.isSelected();
         livingEntity.aiBase = (String) aiBase.getSelectedItem();
         livingEntity.aixml = blocklyPanel.getXML();

@@ -1,0 +1,21 @@
+{
+ "args0": [
+    {
+     "type": "input_value",
+     "name": "player",
+     "check": "Entity"
+    }
+],
+    "inputsInline": true,
+    "output": "Boolean",
+    "colour": 364,
+    "mcreator": {
+      "toolbox_id": "geckolibutils",
+      "toolbox_init": [
+        "<value name=\"player\"><block type=\"source_entity_from_deps\"></block></value>"
+      ],
+      "inputs": [
+        "player"
+      ]
+    }
+}
