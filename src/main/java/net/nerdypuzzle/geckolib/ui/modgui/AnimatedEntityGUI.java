@@ -1404,7 +1404,6 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         AnimatedEntity livingEntity = new AnimatedEntity(modElement);
         livingEntity.model = (String)this.geoModel.getSelectedItem();
         livingEntity.dataGroupPath = (String)this.dataGroup.getSelectedItem();
-        livingEntity.dataGroup = livingEntity.getEntityDataGroup();
         livingEntity.disableDeathRotation = disableDeathRotation.isSelected();
         livingEntity.deathTime = (int) deathTime.getValue();
         //animation stuff

@@ -43,18 +43,18 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public interface ${name}DataGroup {
+public interface I${name}DataGroup {
 
     <#list data.entityDataEntries as entry>
         <#if entry.value().getClass().getSimpleName() == "Integer">
-            void Set${name}DATA_${entry.property().getName()} (Integer value);
-            Integer Get${name}DATA_${entry.property().getName()} ();
+            void SetIDATA_${entry.property().getName()} (Integer value);
+            Integer GetIDATA_${entry.property().getName()} ();
         <#elseif entry.value().getClass().getSimpleName() == "Boolean">
-            void Set${name}DATA_${entry.property().getName()} (Boolean value);
-            Boolean Get${name}DATA_${entry.property().getName()} ();
+            void SetIDATA_${entry.property().getName()} (Boolean value);
+            Boolean GetIDATA_${entry.property().getName()} ();
         <#elseif entry.value().getClass().getSimpleName() == "String">
-            void Set${name}DATA_${entry.property().getName()} (String value);
-            String Get${name}DATA_${entry.property().getName()} ();
+            void SetIDATA_${entry.property().getName()} (String value);
+            String GetIDATA_${entry.property().getName()} ();
         </#if>
     </#list>
 }

@@ -29,6 +29,8 @@ import net.mcreator.workspace.resources.Model;
 import net.mcreator.workspace.resources.Texture;
 import net.nerdypuzzle.geckolib.parts.PluginDataActions;
 import net.nerdypuzzle.geckolib.registry.PluginElementTypes;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -46,6 +48,8 @@ import static net.mcreator.io.writer.JSONWriter.gson;
 public class AnimatedEntity extends GeneratableElement
         implements IEntityWithModel, ITabContainedElement, ICommonType, IMCItemProvider {
 
+    private static final Logger LOG = LogManager.getLogger(AnimatedEntity.class);
+
     public String mobName;
     public String mobLabel;
 
@@ -60,7 +64,6 @@ public class AnimatedEntity extends GeneratableElement
     public NumberProcedure heldItemScale;
     public Procedure solidBoundingBox;
     public String dataGroupPath;
-    public AEntityDataGroup dataGroup;
     public List<PropertyDataWithValue<?>> entityDataEntries;
 
     public double modelWidth, modelHeight, modelShadowSize;
@@ -206,8 +209,6 @@ public class AnimatedEntity extends GeneratableElement
     public List<BiomeEntry> restrictionBiomes;
     public boolean spawnInDungeons;
 
-    private final Gson gson;
-
     private AnimatedEntity() {
         this(null);
     }
@@ -240,13 +241,6 @@ public class AnimatedEntity extends GeneratableElement
         this.raidSpawnsCount = new int[] {4, 3, 3, 4, 4, 4, 2};
 
         this.creativeTabs = new ArrayList<>();
-
-        GsonBuilder gsonBuilder = new GsonBuilder().registerTypeHierarchyAdapter(GeneratableElement.class,
-                        new GeneratableElement.GSONAdapter(this.getModElement().getWorkspace())).disableHtmlEscaping().setPrettyPrinting()
-                .setStrictness(Strictness.LENIENT);
-        RetvalProcedure.GSON_ADAPTERS.forEach(gsonBuilder::registerTypeAdapter);
-
-        this.gson = gsonBuilder.create();
     }
 
     @Override
@@ -317,29 +311,39 @@ public class AnimatedEntity extends GeneratableElement
         };
     }
 
-    public AEntityDataGroup getEntityDataGroup () {
-        AEntityDataGroup retVal = null;
-
-        if (this.dataGroupPath != null && !this.dataGroupPath.isEmpty()) {
-
-            ModElement dataGroupModElement = getModElement().getWorkspace().getModElementByName(this.dataGroupPath);
-            retVal = new AEntityDataGroup(dataGroupModElement);
-            return retVal;
-
-//            try {
-//                File elementsFolder = new File(this.getModElement().getWorkspace().getWorkspaceFolder(), "elements/");
-//                String fullPath = elementsFolder.getPath() + "/" + this.dataGroupPath;
-//                String jsonString = Files.readString(Paths.get(fullPath));
-//                retVal = this.gson.fromJson(jsonString, AEntityDataGroup.class);
-//
-//            } catch (IOException ignored) {
-//            }
-        }
-
-        return retVal;
+    public boolean hasEntityDataGroup() {
+        return getEntityDataGroup() != null;
     }
 
-    public static String getDataGroupName (String path) {
-        return path.replace("mod.json", "");
+    public AEntityDataGroup getEntityDataGroup() {
+        if (dataGroupPath != null && !this.dataGroupPath.isEmpty()) {
+
+            ModElement modElement = this.getModElement().getWorkspace().getModElementByName(getDataGroupName(dataGroupPath));
+
+            if (modElement != null) {
+                // when deserializing, at this point, workspace may not be applied to the ME yet, so we do it now just in case
+                modElement.setWorkspace(this.getModElement().getWorkspace());
+                GeneratableElement generatableElement = modElement.getGeneratableElement();
+                if (generatableElement instanceof AEntityDataGroup) {
+                    return ((AEntityDataGroup) generatableElement);
+                }
+            } else {
+                LOG.warn("AEntityDataGroup {} not found!", getDataGroupName(dataGroupPath));
+            }
+        }
+        return null;
+    }
+
+    public String getDataGroupName() {
+        if (dataGroupPath != null && !this.dataGroupPath.isEmpty()) {
+            return getDataGroupName(dataGroupPath);
+        }
+        else {
+            return "";
+        }
+    }
+
+    public static String getDataGroupName(String path) {
+        return path.replace(".mod.json", "");
     }
 }

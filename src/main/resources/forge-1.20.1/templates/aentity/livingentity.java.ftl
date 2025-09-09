@@ -66,7 +66,7 @@ import net.nerdypuzzle.geckolib.element.types.AnimatedEntity;
 	<#assign extendsClass = "TamableAnimal">
 </#if>
 
-public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements RangedAttackMob, GeoEntity, IGeckoLibEntity<#else>implements GeoEntity, IGeckoLibEntity</#if> {
+public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoLibEntity<#if data.ranged>, RangedAttackMob</#if><#if data.hasEntityDataGroup()>, I${data.getDataGroupName()}DataGroup</#if> {
     public static final EntityDataAccessor<Boolean> SHOOT = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(
@@ -74,7 +74,7 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
     public static final EntityDataAccessor<String> TEXTURE = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.STRING);
 
-		<#list data.entityDataEntries as entry>
+    <#list data.entityDataEntries as entry>
 		<#if entry.value().getClass().getSimpleName() == "Integer">
 			public static final EntityDataAccessor<Integer> DATA_${entry.property().getName()} = SynchedEntityData.defineId(${name}Entity.class, EntityDataSerializers.INT);
 		<#elseif entry.value().getClass().getSimpleName() == "Boolean">
@@ -83,6 +83,18 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			public static final EntityDataAccessor<String> DATA_${entry.property().getName()} = SynchedEntityData.defineId(${name}Entity.class, EntityDataSerializers.STRING);
 		</#if>
 	</#list>
+
+    <#if data.hasEntityDataGroup()>
+	<#list data.getEntityDataGroup().entityDataEntries as entry>
+    		<#if entry.value().getClass().getSimpleName() == "Integer">
+    			public static final EntityDataAccessor<Integer> IDATA_${entry.property().getName()} = SynchedEntityData.defineId(${name}Entity.class, EntityDataSerializers.INT);
+    		<#elseif entry.value().getClass().getSimpleName() == "Boolean">
+    			public static final EntityDataAccessor<Boolean> IDATA_${entry.property().getName()} = SynchedEntityData.defineId(${name}Entity.class, EntityDataSerializers.BOOLEAN);
+    		<#elseif entry.value().getClass().getSimpleName() == "String">
+    			public static final EntityDataAccessor<String> IDATA_${entry.property().getName()} = SynchedEntityData.defineId(${name}Entity.class, EntityDataSerializers.STRING);
+    		</#if>
+    	</#list>
+    </#if>
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	private boolean swinging;
@@ -225,6 +237,11 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			    this.entityData.define(DATA_${entry.property().getName()}, ${entry.value()?is_string?then("\"" + entry.value() + "\"", entry.value())});
 		    </#list>
 		</#if>
+		<#if data.hasEntityDataGroup()>
+        	<#list data.getEntityDataGroup().entityDataEntries as entry>
+            this.entityData.define(IDATA_${entry.property().getName()}, ${entry.value()?is_string?then("\"" + entry.value() + "\"", entry.value())});
+            </#list>
+        </#if>
 	}
 
     @Override
@@ -621,6 +638,17 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 			    </#if>
 		    </#list>
 		</#if>
+		<#if data.hasEntityDataGroup()>
+        	<#list data.getEntityDataGroup().entityDataEntries as entry>
+                    <#if entry.value().getClass().getSimpleName() == "Integer">
+                    compound.putInt("IData${entry.property().getName()}", this.entityData.get(IDATA_${entry.property().getName()}));
+                    <#elseif entry.value().getClass().getSimpleName() == "Boolean">
+                    compound.putBoolean("IData${entry.property().getName()}", this.entityData.get(IDATA_${entry.property().getName()}));
+                    <#elseif entry.value().getClass().getSimpleName() == "String">
+                    compound.putString("IData${entry.property().getName()}", this.entityData.get(IDATA_${entry.property().getName()}));
+                    </#if>
+            </#list>
+        </#if>
 	}
 
 	@Override public void readAdditionalSaveData(CompoundTag compound) {
@@ -644,7 +672,51 @@ public class ${name}Entity extends ${extendsClass} <#if data.ranged>implements R
 				    </#if>
 		    </#list>
 		</#if>
+		<#if data.hasEntityDataGroup()>
+            <#list data.getEntityDataGroup().entityDataEntries as entry>
+			    if (compound.contains("IData${entry.property().getName()}"))
+				    <#if entry.value().getClass().getSimpleName() == "Integer">
+				    this.entityData.set(IDATA_${entry.property().getName()}, compound.getInt("IData${entry.property().getName()}"));
+				    <#elseif entry.value().getClass().getSimpleName() == "Boolean">
+				    this.entityData.set(IDATA_${entry.property().getName()}, compound.getBoolean("IData${entry.property().getName()}"));
+				    <#elseif entry.value().getClass().getSimpleName() == "String">
+				    this.entityData.set(IDATA_${entry.property().getName()}, compound.getString("IData${entry.property().getName()}"));
+				    </#if>
+            </#list>
+        </#if>
+
     }
+    <#if data.hasEntityDataGroup()>
+        <#list data.getEntityDataGroup().entityDataEntries as entry>
+                @Override
+            <#if entry.value().getClass().getSimpleName() == "Integer">
+                public void SetIDATA_${entry.property().getName()} (Integer value) {
+                    this.entityData.set(IDATA_${entry.property().getName()}, value);
+                }
+                @Override
+                public Integer GetIDATA_${entry.property().getName()} () {
+                    return this.entityData.get(IDATA_${entry.property().getName()});
+                }
+            <#elseif entry.value().getClass().getSimpleName() == "Boolean">
+                public void SetIDATA_${entry.property().getName()} (Boolean value) {
+                    this.entityData.set(IDATA_${entry.property().getName()}, value);
+                }
+                @Override
+                public Boolean GetIDATA_${entry.property().getName()} () {
+                    return this.entityData.get(IDATA_${entry.property().getName()});
+                }
+            <#elseif entry.value().getClass().getSimpleName() == "String">
+                public void SetIDATA_${entry.property().getName()} (String value) {
+                    this.entityData.set(IDATA_${entry.property().getName()}, value);
+                }
+
+                @Override
+                public String GetIDATA_${entry.property().getName()} () {
+                    return this.entityData.get(IDATA_${entry.property().getName()});
+                }
+            </#if>
+        </#list>
+    </#if>
 
 	<#if hasProcedure(data.onRightClickedOn) || data.ridable || (data.tameable && data.breedable) || (data.guiBoundTo?has_content && data.guiBoundTo != "<NONE>")>
 	@Override public InteractionResult mobInteract(Player sourceentity, InteractionHand hand) {
