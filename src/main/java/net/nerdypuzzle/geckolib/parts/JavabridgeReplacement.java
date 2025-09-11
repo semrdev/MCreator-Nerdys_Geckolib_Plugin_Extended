@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,9 +17,11 @@ import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.blockly.data.Dependency;
 import net.mcreator.blockly.data.ExternalTrigger;
 import net.mcreator.blockly.java.BlocklyVariables;
+import net.mcreator.element.BaseType;
 import net.mcreator.element.ModElementType;
 import net.mcreator.element.types.LivingEntity;
 import net.mcreator.element.types.Procedure;
+import net.mcreator.element.types.interfaces.ICommonType;
 import net.mcreator.minecraft.DataListEntry;
 import net.mcreator.minecraft.DataListLoader;
 import net.mcreator.minecraft.ElementUtil;
@@ -36,6 +39,7 @@ import net.mcreator.workspace.Workspace;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.elements.VariableType;
 import net.mcreator.workspace.elements.VariableTypeLoader;
+import net.nerdypuzzle.geckolib.element.types.AEntityDataGroup;
 import net.nerdypuzzle.geckolib.element.types.AnimatedEntity;
 import netscape.javascript.JSObject;
 import org.apache.commons.lang3.StringUtils;
@@ -168,9 +172,33 @@ public final class JavabridgeReplacement {
                     }).toList();
                 }
             }
+            else if (ent instanceof AEntityDataGroup entity) {
+                if (entity != null) {
+                    return entity.entityDataEntries.stream().filter((e) -> {
+                        return e.property().getClass().equals(type);
+                    }).map((e) -> {
+                        return e.property().getName();
+                    }).toList();
+                }
+            }
         }
 
         return new ArrayList();
+    }
+
+    /**
+     * Warning: this method relies on getGeneratableElement that is not thread safe, so this method is also not thread safe
+     */
+    public static List<DataListEntry> loadEntityDataGroups(Workspace workspace) {
+        List<DataListEntry> retval = getCustomElements(workspace, (mu) -> {
+            return mu.getGeneratableElement() instanceof AEntityDataGroup;
+        });
+        Collections.sort(retval);
+        return retval;
+    }
+
+    private static List<DataListEntry> getCustomElements(@Nonnull Workspace workspace, Predicate<ModElement> predicate) {
+        return (List)workspace.getModElements().stream().filter(predicate).map(DataListEntry.Custom::new).collect(Collectors.toList());
     }
 
     /**
@@ -191,6 +219,7 @@ public final class JavabridgeReplacement {
                     w -> ElementUtil.loadAllSpawnableEntities(w).stream().filter(e -> e.isSupportedInWorkspace(w))
                             .toList(), "entity");
             case "customEntity" -> openDataListEntrySelector(ElementUtil::loadCustomEntities, "entity");
+            case "entityDataGroup" -> openDataListEntrySelector(JavabridgeReplacement::loadEntityDataGroups, "entityDataGroup");
             case "entitydata_logic" -> openStringEntrySelector(
                     w -> loadEntityDataListFromCustomEntity(w, customEntryProviders,
                             PropertyData.LogicType.class).toArray(String[]::new), "entity_data");

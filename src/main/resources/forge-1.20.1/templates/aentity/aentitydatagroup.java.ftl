@@ -43,7 +43,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public interface I${name}DataGroup {
+public interface I${name}EntityDataGroup {
 
     <#list data.entityDataEntries as entry>
         <#if entry.value().getClass().getSimpleName() == "Integer">

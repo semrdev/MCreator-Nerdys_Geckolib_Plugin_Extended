@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class AEntityDataGroup extends GeneratableElement
-    implements ICommonType {
+public class AEntityDataGroup extends GeneratableElement {
 
     public List<PropertyDataWithValue<?>> entityDataEntries;
 
@@ -22,10 +21,6 @@ public class AEntityDataGroup extends GeneratableElement
     public AEntityDataGroup(ModElement element) {
         super(element);
         this.entityDataEntries = new ArrayList<>();
-    }
-
-    public Collection<BaseType> getBaseTypesProvided() {
-        return List.of(BaseType.ENTITY);
     }
 
     public class JSONWrapper {

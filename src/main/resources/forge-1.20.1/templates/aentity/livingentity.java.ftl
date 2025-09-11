@@ -66,7 +66,7 @@ import net.nerdypuzzle.geckolib.element.types.AnimatedEntity;
 	<#assign extendsClass = "TamableAnimal">
 </#if>
 
-public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoLibEntity<#if data.ranged>, RangedAttackMob</#if><#if data.hasEntityDataGroup()>, I${data.getDataGroupName()}DataGroup</#if> {
+public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoLibEntity<#if data.ranged>, RangedAttackMob</#if><#if data.hasEntityDataGroup()>, I${data.getDataGroupName()}EntityDataGroup</#if> {
     public static final EntityDataAccessor<Boolean> SHOOT = SynchedEntityData.defineId(
       ${name}Entity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(
