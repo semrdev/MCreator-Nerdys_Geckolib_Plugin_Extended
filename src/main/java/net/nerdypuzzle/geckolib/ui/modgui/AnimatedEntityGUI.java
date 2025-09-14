@@ -406,6 +406,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         JPanel pane3 = new JPanel(new BorderLayout(0, 0));
         JPanel pane4 = new JPanel(new BorderLayout(0, 0));
         JPanel pane5 = new JPanel(new BorderLayout(0, 0));
+        JPanel pane6 = new JPanel(new BorderLayout(0, 0));
         JPanel pane7 = new JPanel(new BorderLayout(0, 0));
         JPanel pane8 = new JPanel(new BorderLayout(0, 0));
 
@@ -513,20 +514,31 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
         pane1.add("Center", PanelUtils.totalCenterInPanel(PanelUtils.northAndCenterElement(subpane1, subpanel2)));
 
-        JPanel entityDataListPanel = new JPanel(new GridLayout());
+        JPanel dataPanelTop = new JPanel(new GridLayout());
+        dataPanelTop.setPreferredSize(new Dimension(0, 32));
 
+        dataPanelTop.add(PanelUtils.join(FlowLayout.LEFT,
+                HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/aentitydatagroup"),
+                        L10N.label("elementgui.animatedentity.dataGroups")),
+                this.dataGroup));
+        ComponentUtils.deriveFont(this.dataGroup, 16.0F);
+
+        JPanel entityDataListPanel = new JPanel(new GridLayout());
         JComponent entityDataListComp = PanelUtils.northAndCenterElement(
                 HelpUtils.wrapWithHelpButton(this.withEntry("entity/entity_data"),
                         L10N.label("elementgui.living_entity.entity_data")), entityDataList);
         entityDataListPanel.setOpaque(false);
         entityDataListComp.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-
-        entityDataListPanel.add(HelpUtils.wrapWithHelpButton(this.withEntry("entity/aentitydatagroup"),
-                L10N.label("elementgui.animatedentity.dataGroups")));
-        ComponentUtils.deriveFont(this.dataGroup, 16.0F);
-        entityDataListPanel.add(this.dataGroup);
         entityDataListPanel.add(entityDataListComp);
+
+        JPanel dataPanel = new JPanel(new BorderLayout(0, 5));
+        dataPanel.setOpaque(false);
+
+        dataPanel.add("North", dataPanelTop);
+        dataPanel.add("Center", entityDataListPanel);
+
+        pane6.add("Center", ComponentUtils.applyPadding(dataPanel, 10, true, true, true, true));
+
 
         JPanel spo2 = new JPanel(new GridLayout(18, 2, 2, 2));
 
@@ -1077,7 +1089,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
         addPage(L10N.t("elementgui.living_entity.page_visual_and_sound"), pane2);
         addPage(L10N.t("elementgui.living_entity.page_behaviour"), pane1);
-        addPage(L10N.t("elementgui.living_entity.page_entity_data"), entityDataListPanel);
+        addPage(L10N.t("elementgui.living_entity.page_entity_data"), pane6);
         addPage(L10N.t("elementgui.common.page_inventory"), pane7);
         addPage(L10N.t("elementgui.common.page_triggers"), pane4);
         addPage(L10N.t("elementgui.living_entity.page_ai_and_goals"), pane3);
