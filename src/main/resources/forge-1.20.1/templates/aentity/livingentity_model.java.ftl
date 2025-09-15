@@ -20,15 +20,18 @@ public class ${name}Model extends GeoModel<${name}Entity> {
     }
 
     <#if hasProcedure(data.headMovementProcedure) || data.headMovement>
+    int x, y, z;
+    Level world;
+
     @Override
     public void setCustomAnimations(${name}Entity entity, long instanceId, AnimationState animationState) {
 	    CoreGeoBone head = getAnimationProcessor().getBone("${data.groupName}");
 	    if (head != null) {
 	        <#if hasProcedure(data.headMovementProcedure)>
-	            int x = entity.blockPosition().getX();
-                int y = entity.blockPosition().getY();
-                int z = entity.blockPosition().getZ();
-                Level world = entity.level();
+	            x = entity.blockPosition().getX();
+                y = entity.blockPosition().getY();
+                z = entity.blockPosition().getZ();
+                world = entity.level();
 	            if (<@procedureOBJToConditionCode data.headMovementProcedure/>){
 	        </#if>
 
