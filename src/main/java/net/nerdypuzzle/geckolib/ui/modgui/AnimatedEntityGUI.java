@@ -28,6 +28,7 @@ import net.mcreator.ui.modgui.IBlocklyPanelHolder;
 import net.mcreator.ui.modgui.ModElementGUI;
 import net.mcreator.ui.procedure.AbstractProcedureSelector;
 import net.mcreator.ui.procedure.NumberProcedureSelector;
+import net.mcreator.ui.procedure.LogicProcedureSelector;
 import net.mcreator.ui.procedure.ProcedureSelector;
 import net.mcreator.ui.validation.AggregatedValidationResult;
 import net.mcreator.ui.validation.Validator;
@@ -50,6 +51,8 @@ import net.nerdypuzzle.geckolib.registry.PluginElementTypes;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 import java.util.*;
@@ -249,12 +252,12 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
     private ProcedureSelector finishedDying;
 
+    private LogicProcedureSelector headMovementProcedure;
     private final JCheckBox headMovement = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox eyeHeight = L10N.checkbox("elementgui.animatedentity.eye_height");
 
     private final JTextField groupName = new JTextField();
 
-//    private final VComboBox<AEntityDataGroup> dataGroup;
     private final VComboBox<String> dataGroup;
 
     private final VComboBox<String> geoModel;
@@ -362,6 +365,10 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
                 VariableTypeLoader.BuiltInTypes.LOGIC,
                 Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity")).setDefaultName(
                 L10N.t("condition.common.false")).makeInline();
+        headMovementProcedure = new LogicProcedureSelector(this.withEntry("geckolib/head_movement"), mcreator,
+                L10N.t("elementgui.living_entity.head_movement_procedure"), AbstractProcedureSelector.Side.BOTH,
+                new JCheckBox(), 0,
+                Dependency.fromString("x:number/y:number/z:number/world:world/entity:entity"));
 
         restrictionBiomes = new BiomeListField(mcreator);
         breedTriggerItems = new MCItemListField(mcreator, ElementUtil::loadBlocksAndItems);
@@ -1026,17 +1033,17 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
 
 
         //extra animations panel
-        JPanel extras = new JPanel(new GridLayout(2, 2, 20, 2));
+        JPanel extras = new JPanel(new GridLayout(3, 2, 20, 2));
 
         extras.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder((Color)UIManager.get("MCreatorLAF.BRIGHT_COLOR"), 1),
                 L10N.t("elementgui.animatedentity.extras_boarder", new Object[0]),
                 0, 0, this.getFont().deriveFont(12.0F), (Color)UIManager.get("MCreatorLAF.BRIGHT_COLOR")));
 
-        JPanel extras_head = new JPanel(new GridLayout(2, 2, 10, 2));
+        JPanel extras_head = new JPanel(new GridLayout(3, 2, 10, 2));
 
-        extras_head.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/head_movement"),
-                L10N.label("elementgui.animatedentity.head_movement")));
-        extras_head.add(headMovement);
+        extras_head.add(L10N.label("elementgui.animatedentity.head_movement"));
+        extras_head.add(headMovementProcedure);
+
         extras_head.add(L10N.label("elementgui.animatedentity.group_name"));
         extras_head.add(groupName);
 
@@ -1105,7 +1112,6 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         animation8.setEnabled(enable8.isSelected());
         animation9.setEnabled(enable9.isSelected());
         animation10.setEnabled(enable10.isSelected());
-        groupName.setEnabled(headMovement.isSelected());
         height.setEnabled(eyeHeight.isSelected());
 
         enable2.addActionListener(actionEvent -> {
@@ -1144,10 +1150,6 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
             animation10.setEnabled(enable10.isSelected());
         });
 
-        headMovement.addActionListener(actionEvent -> {
-            groupName.setEnabled(headMovement.isSelected());
-        });
-
         eyeHeight.addActionListener(actionEvent -> {
             height.setEnabled(eyeHeight.isSelected());
         });
@@ -1179,6 +1181,8 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         boundingBoxScale.refreshListKeepSelected();
         solidBoundingBox.refreshListKeepSelected();
         heldItemScale.refreshListKeepSelected();
+
+        headMovementProcedure.refreshListKeepSelected();
 
         ComboBoxUtil.updateComboBoxContents(mobModelTexture, ListUtils.merge(Collections.singleton(""),
                 mcreator.getFolderManager().getTexturesList(TextureType.ENTITY).stream().map(File::getName)
@@ -1251,7 +1255,8 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         enable10.setSelected(livingEntity.enable10);
         //
         finishedDying.setSelectedProcedure(livingEntity.finishedDying);
-        headMovement.setSelected(livingEntity.headMovement);
+        headMovementProcedure.setFixedValue(livingEntity.headMovement);
+        headMovementProcedure.setSelectedProcedure(livingEntity.headMovementProcedure);
         groupName.setText(livingEntity.groupName);
         lerp.setValue(livingEntity.lerp);
         eyeHeight.setSelected(livingEntity.eyeHeight);
@@ -1407,7 +1412,6 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         animation9.setEnabled(enable9.isSelected());
         animation10.setEnabled(enable10.isSelected());
 
-        groupName.setEnabled(headMovement.isSelected());
         height.setEnabled(eyeHeight.isSelected());
 
     }
@@ -1440,7 +1444,8 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.enable10 = enable10.isSelected();
         //
         livingEntity.finishedDying = finishedDying.getSelectedProcedure();
-        livingEntity.headMovement = headMovement.isSelected();
+        livingEntity.headMovement = headMovementProcedure.getFixedValue();
+        livingEntity.headMovementProcedure = headMovementProcedure.getSelectedProcedure();
         livingEntity.groupName = groupName.getText();
         livingEntity.lerp = (int) lerp.getValue();
         livingEntity.eyeHeight = eyeHeight.isSelected();

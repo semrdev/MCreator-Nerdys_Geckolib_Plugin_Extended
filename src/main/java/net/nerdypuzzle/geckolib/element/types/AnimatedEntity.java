@@ -1,16 +1,13 @@
 package net.nerdypuzzle.geckolib.element.types;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.Strictness;
 import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.blockly.java.BlocklyToJava;
 import net.mcreator.element.BaseType;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.element.parts.*;
 import net.mcreator.element.parts.procedure.NumberProcedure;
+import net.mcreator.element.parts.procedure.LogicProcedure;
 import net.mcreator.element.parts.procedure.Procedure;
-import net.mcreator.element.parts.procedure.RetvalProcedure;
 import net.mcreator.element.types.interfaces.ICommonType;
 import net.mcreator.element.types.interfaces.IEntityWithModel;
 import net.mcreator.element.types.interfaces.IMCItemProvider;
@@ -27,7 +24,6 @@ import net.mcreator.util.FilenameUtilsPatched;
 import net.mcreator.workspace.elements.ModElement;
 import net.mcreator.workspace.resources.Model;
 import net.mcreator.workspace.resources.Texture;
-import net.nerdypuzzle.geckolib.parts.PluginDataActions;
 import net.nerdypuzzle.geckolib.registry.PluginElementTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,14 +31,8 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
-
-import static net.mcreator.io.writer.JSONWriter.gson;
 
 @SuppressWarnings("unused")
 public class AnimatedEntity extends GeneratableElement
@@ -188,6 +178,7 @@ public class AnimatedEntity extends GeneratableElement
     public boolean tameable;
     public boolean disableDeathRotation;
     public boolean headMovement;
+    public LogicProcedure headMovementProcedure;
     public boolean eyeHeight;
     public List<MItemBlock> breedTriggerItems;
 
