@@ -1,0 +1,29 @@
+{
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "bones",
+      "check": "String"
+    },
+    {
+      "type": "input_value",
+      "name": "entity",
+      "check": "Entity"
+    }
+  ],
+  "inputsInline": false,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": "364",
+  "mcreator": {
+    "toolbox_id": "geckolibentities",
+    "toolbox_init": [
+      "<value name=\"bones\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
+      "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
+    ],
+    "inputs": [
+      "bones",
+      "entity"
+    ]
+  }
+}
