@@ -10,7 +10,7 @@
    "output": "String",
    "colour": 364,
    "mcreator": {
-     "toolbox_id": "geckolib",
+     "toolbox_id": "geckolibentities",
      "toolbox_init": [
        "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
 ],

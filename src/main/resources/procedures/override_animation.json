@@ -21,7 +21,7 @@
   "nextStatement": null,
   "colour": "364",
   "mcreator": {
-    "toolbox_id": "geckolib",
+    "toolbox_id": "geckolibentities",
     "toolbox_init": [
       "<value name=\"animType\"><block type=\"text\"><field name=\"TEXT\">IDLE</field></block></value>",
       "<value name=\"animOverride\"><block type=\"text\"><field name=\"TEXT\">sit</field></block></value>",

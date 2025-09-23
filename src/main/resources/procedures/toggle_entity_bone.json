@@ -35,7 +35,7 @@
   "nextStatement": null,
   "colour": "364",
   "mcreator": {
-    "toolbox_id": "geckolib",
+    "toolbox_id": "geckolibentities",
     "toolbox_init": [
       "<value name=\"bone\"><block type=\"text\"><field name=\"TEXT\">bone1, bone2</field></block></value>",
       "<value name=\"visible\"><block type=\"logic_boolean\"><field name=\"BOOL\">FALSE</field></block></value>",

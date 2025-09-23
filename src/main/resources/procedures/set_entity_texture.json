@@ -16,7 +16,7 @@
    "nextStatement": null,
    "colour": 364,
    "mcreator": {
-     "toolbox_id": "geckolib",
+     "toolbox_id": "geckolibentities",
      "toolbox_init": [
        "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>",
        "<value name=\"texture\"><block type=\"text\"><field name=\"TEXT\">texture</field></block></value>"
