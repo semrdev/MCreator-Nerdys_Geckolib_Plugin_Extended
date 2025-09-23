@@ -44,5 +44,12 @@ public interface IGeckoLibEntity {
 
     public void setPassengerIsSitting(boolean isSitting);
 
+    public void setModelBoneColor(String bones, String color);
+
+    public void setModelBoneColor(String bones, float red, float green, float blue);
+
+    public void resetModelBoneColor(String bones);
+
+    public void setModelBoneAlpha(String bones, float alpha);
 
 }

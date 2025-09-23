@@ -34,6 +34,8 @@ package ${package}.entity;
 <#include "../mcitems.ftl">
 <#include "../procedures.java.ftl">
 
+import ${package}.utils.ProcedureUtils;
+
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.Tag;
@@ -1393,6 +1395,97 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
             }
         }
 	}
+
+	// ===== MODEL BONE RECOLORING & ALPHA =====
+
+	// A custom record for storing the bone color overrides in a hash map.
+    public record BoneColorOverride(float red, float green, float blue, float alpha) {
+        public boolean isEmpty() {
+            return (
+                red < 0 &&
+                green < 0 &&
+                blue < 0 &&
+                alpha < 0
+            );
+        }
+    }
+
+    // A hash map for storing recolored bones.
+    public final Map<String, BoneColorOverride> recoloredBones = new HashMap<>();
+
+    @Override
+    public void setModelBoneColor(String bones, String color) {
+        float[] colorValues = ProcedureUtils.parseHexColor(color);
+
+        if (colorValues != null) {
+            this.setModelBoneColor(bones, colorValues[0], colorValues[1], colorValues[2]);
+        }
+        else {
+            this.resetModelBoneColor(bones);
+        }
+    }
+
+    @Override
+	public void setModelBoneColor(String bones, float red, float green, float blue) {
+        String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+
+        for (String bone : boneArray) {
+            this.recoloredBones.put(bone, new BoneColorOverride(
+                red,
+                green,
+                blue,
+                this.recoloredBones.containsKey(bone) ? this.recoloredBones.get(bone).alpha : -1
+            ));
+        }
+    }
+
+    @Override
+    public void resetModelBoneColor(String bones) {
+        String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+
+        for (String bone : boneArray) {
+            if (this.recoloredBones.containsKey(bone)) {
+                if (this.recoloredBones.get(bone).alpha >= 0)
+                {
+                    float oldAlpha = this.recoloredBones.get(bone).alpha;
+                    this.recoloredBones.put(bone, new BoneColorOverride(
+                        -1,
+                        -1,
+                        -1,
+                        oldAlpha
+                    ));
+                }
+                else {
+                    this.recoloredBones.remove(bone);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setModelBoneAlpha(String bones, float alpha) {
+        String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+
+        for (String bone : boneArray) {
+            if (this.recoloredBones.containsKey(bone)) {
+                BoneColorOverride oldValues = this.recoloredBones.get(bone);
+                this.recoloredBones.put(bone, new BoneColorOverride(
+                    oldValues.red,
+                    oldValues.green,
+                    oldValues.blue,
+                    alpha
+                ));
+                if (this.recoloredBones.get(bone).isEmpty()){
+                    this.recoloredBones.remove(bone);
+                }
+            }
+            else {
+                if (alpha >= 0) {
+                    this.recoloredBones.put(bone, new BoneColorOverride(-1, -1, -1, alpha));
+                }
+            }
+        }
+    }
 
 	// A custom record for storing the bone UV offsets inside a hash map.
 	public record BoneUVOffset(float uOffset, float vOffset) {}

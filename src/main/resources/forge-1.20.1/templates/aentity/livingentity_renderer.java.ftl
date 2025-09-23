@@ -172,6 +172,7 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
 
     private OffsetVertexConsumer cachedOffsetVertexConsumer = new OffsetVertexConsumer();
     private ${name}Entity.BoneUVOffset uvOffset;
+    private ${name}Entity.BoneColorOverride boneColorOverride;
 
     private BoneTextureLayer cachedBoneTextureLayer;
 
@@ -204,13 +205,24 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
         this.uvOffset = null;
         if (entity.boneUVOffsets != null && entity.boneUVOffsets.containsKey(bone.getName())) {
             this.uvOffset = entity.boneUVOffsets.get(bone.getName());
+            this.cachedOffsetVertexConsumer.setup(buffer, this.uvOffset.uOffset(), this.uvOffset.vOffset());
         }
 
-        if (this.uvOffset != null) {
-            this.cachedOffsetVertexConsumer.setup(buffer, this.uvOffset.uOffset(), this.uvOffset.vOffset());
-            super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.cachedOffsetVertexConsumer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
-        } else {
-            super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        this.boneColorOverride = null;
+        if (entity.recoloredBones != null && entity.recoloredBones.containsKey(bone.getName())) {
+            this.boneColorOverride = entity.recoloredBones.get(bone.getName());
+        }
+
+        if (boneColorOverride != null) {
+            super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.uvOffset != null ? this.cachedOffsetVertexConsumer : buffer, isReRender, partialTick, packedLight, packedOverlay,
+                this.boneColorOverride.red() >= 0 ? this.boneColorOverride.red() : red,
+                this.boneColorOverride.green() >= 0 ? this.boneColorOverride.green() : green,
+                this.boneColorOverride.blue() >= 0 ? this.boneColorOverride.blue() : blue,
+                this.boneColorOverride.alpha() >= 0 ? this.boneColorOverride.alpha() : alpha
+            );
+        }
+        else {
+            super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, this.uvOffset != null ? this.cachedOffsetVertexConsumer : buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         }
     }
 
