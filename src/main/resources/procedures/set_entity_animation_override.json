@@ -1,0 +1,68 @@
+{
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "animType",
+      "options": [
+        [
+          "Idle", "IDLE"
+        ],
+        [
+          "Walking", "WALKING"
+        ],
+        [
+          "Death", "DEATH"
+        ],
+        [
+          "Attack", "ATTACK"
+        ],
+        [
+          "Swim", "SWIM"
+        ],
+        [
+          "Sneak", "SNEAK"
+        ],
+        [
+          "Sprint", "SPRINT"
+        ],
+        [
+          "Flight", "FLIGHT"
+        ],
+        [
+          "Riding", "RIDING"
+        ],
+        [
+          "Aggression", "AGGRESSION"
+        ]
+      ]
+    },
+    {
+      "type": "input_value",
+      "name": "animOverride",
+      "check": "String"
+    },
+    {
+      "type": "input_value",
+      "name": "entity",
+      "check": "Entity"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": "364",
+  "mcreator": {
+    "toolbox_id": "geckolibentities",
+    "toolbox_init": [
+      "<value name=\"animOverride\"><block type=\"text\"><field name=\"TEXT\">sit</field></block></value>",
+      "<value name=\"entity\"><block type=\"entity_from_deps\"></block></value>"
+    ],
+    "inputs": [
+      "animOverride",
+      "entity"
+    ],
+    "fields": [
+      "animType"
+    ]
+  }
+}

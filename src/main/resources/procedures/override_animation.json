@@ -19,9 +19,8 @@
   "inputsInline": true,
   "previousStatement": null,
   "nextStatement": null,
-  "colour": "364",
+  "colour": "#808080",
   "mcreator": {
-    "toolbox_id": "geckolibentities",
     "toolbox_init": [
       "<value name=\"animType\"><block type=\"text\"><field name=\"TEXT\">IDLE</field></block></value>",
       "<value name=\"animOverride\"><block type=\"text\"><field name=\"TEXT\">sit</field></block></value>",
