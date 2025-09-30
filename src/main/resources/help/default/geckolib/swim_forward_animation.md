@@ -1,0 +1,1 @@
+This animation will replace the walk animation while the entity is in water.

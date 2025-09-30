@@ -155,7 +155,9 @@ public class AnimatedEntity extends GeneratableElement
     public String animation3;
     public String animation4;
     public String animation5;
+    public String animationSwimForward;
     public String animation6;
+    public String animationSneakWalk;
     public String animation7;
     public String animation8;
     public String animation9;
@@ -166,7 +168,9 @@ public class AnimatedEntity extends GeneratableElement
     public boolean enable3;
     public boolean enable4;
     public boolean enable5;
+    public boolean enableSwimForward;
     public boolean enable6;
+    public boolean enableSneakWalk;
     public boolean enable7;
     public boolean enable8;
     public boolean enable9;

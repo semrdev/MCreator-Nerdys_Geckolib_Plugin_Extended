@@ -17,10 +17,16 @@
           "Attack", "ATTACK"
         ],
         [
-          "Swim", "SWIM"
+          "Swim Idle", "SWIM"
         ],
         [
-          "Sneak", "SNEAK"
+          "Swim Forward", "SWIMFORWARD"
+        ],
+        [
+          "Sneak Idle", "SNEAK"
+        ],
+        [
+          "Sneak Walk", "SNEAKWALK"
         ],
         [
           "Sprint", "SPRINT"

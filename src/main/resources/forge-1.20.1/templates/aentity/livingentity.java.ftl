@@ -1200,7 +1200,9 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 	private OverridableAnimation animation3 = new OverridableAnimation("${data.animation3}");
 	private OverridableAnimation animation4 = new OverridableAnimation("${data.animation4}");
 	private OverridableAnimation animation5 = new OverridableAnimation("${data.animation5}");
+	private OverridableAnimation animationSwimForward = new OverridableAnimation("${data.animationSwimForward}");
 	private OverridableAnimation animation6 = new OverridableAnimation("${data.animation6}");
+	private OverridableAnimation animationSneakWalk = new OverridableAnimation("${data.animationSneakWalk}");
 	private OverridableAnimation animation7 = new OverridableAnimation("${data.animation7}");
 	private OverridableAnimation animation8 = new OverridableAnimation("${data.animation8}");
 	private OverridableAnimation animation9 = new OverridableAnimation("${data.animation9}");
@@ -1228,10 +1230,16 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 			"SWIM" == animationTypeProcessed ||
 			"SWIMMING" == animationTypeProcessed) {
 			this.animation5.overrideAnim(animID);
+		} else if ("SWIMFORWARD" == animationTypeProcessed ||
+			"SWIM_FORWARD" == animationTypeProcessed) {
+			this.animationSwimForward.overrideAnim(animID);
 		} else if ("6" == animationTypeProcessed ||
 			"SNEAK" == animationTypeProcessed ||
 			"SNEAKING" == animationTypeProcessed) {
 			this.animation6.overrideAnim(animID);
+		} else if ("SNEAKWALK" == animationTypeProcessed ||
+			"SNEAK_WALK" == animationTypeProcessed) {
+			this.animationSneakWalk.overrideAnim(animID);
 		} else if ("7" == animationTypeProcessed ||
 			"SPRINT" == animationTypeProcessed ||
 			"SPRINTING" == animationTypeProcessed) {
@@ -1264,11 +1272,50 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 
 	private PlayState movementPredicate(AnimationState event) {
 	      if (this.animationprocedure.equals("empty")) {
-		<#if data.enable2>
+	    // Movement anims: walk / sprint / fly / swim forward / sneak walk / aggression walk
+		<#if data.enable2 || data.enable7 || data.enable8 || data.enableSwimForward || data.enableSneakWalk || data.enable10>
 		if ((event.isMoving() || !(event.getLimbSwingAmount() > -0.15F && event.getLimbSwingAmount() < 0.15F))
-		<#if data.enable8>&& this.onGround()</#if> <#if data.enable9>&& !this.isVehicle()</#if>
-		<#if data.enable10>&& !this.isAggressive()</#if> <#if data.enable7>&& !this.isSprinting()</#if>) {
-			return this.getAnimAndResetIfNeeded(animation2, event);
+		<#if data.enable9>&& !this.isVehicle()</#if>) {
+
+        <#if data.enableSwimForward>
+        // Swimming Forward
+            if (this.isInWaterOrBubble()) {
+                return this.getAnimAndResetIfNeeded(animationSwimForward, event);
+            }
+        </#if>
+
+		<#if data.enable8>
+		// Flying
+		if (!this.onGround()) {
+			return this.getAnimAndResetIfNeeded(animation8, event);
+		}
+		</#if>
+
+		<#if data.enable6>
+		// Sneak Walking
+		if (this.isShiftKeyDown()) {
+			return this.getAnimAndResetIfNeeded(animation6, event);
+		}
+		</#if>
+
+		<#if data.enable7>
+        // Sprinting
+        if (this.isSprinting()) {
+            return this.getAnimAndResetIfNeeded(animation7, event);
+        }
+        </#if>
+
+		<#if data.enable10>
+		// Aggressive Walking
+		if (this.isAggressive()) {
+		  	return this.getAnimAndResetIfNeeded(animation10, event);
+		}
+		</#if>
+
+        <#if data.enable2>
+        // Normal Walking
+        return this.getAnimAndResetIfNeeded(animation2, event);
+        </#if>
 		}
 		</#if>
 		<#if data.enable3>
@@ -1286,11 +1333,6 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 			return this.getAnimAndResetIfNeeded(animation6, event);
 		}
 		</#if>
-		<#if data.enable7>
-		if (this.isSprinting()) {
-			return this.getAnimAndResetIfNeeded(animation7, event);
-		}
-		</#if>
 		<#if data.enable8>
 		if (!this.onGround()) {
 			return this.getAnimAndResetIfNeeded(animation8, event);
@@ -1299,11 +1341,6 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 		<#if data.enable9>
 		if (this.isVehicle() && event.isMoving()) {
 			return this.getAnimAndResetIfNeeded(animation9, event);
-		}
-		</#if>
-		<#if data.enable10>
-		if (this.isAggressive() && event.isMoving()<#if data.enable9> && !this.isVehicle()</#if>) {
-		  	return this.getAnimAndResetIfNeeded(animation10, event);
 		}
 		</#if>
 		  	return this.getAnimAndResetIfNeeded(animation1, event);

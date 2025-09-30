@@ -234,7 +234,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private final JTextField animation3 = new JTextField();
     private final JTextField animation4 = new JTextField();
     private final JTextField animation5 = new JTextField();
+    private final JTextField animationSwimForward = new JTextField();
     private final JTextField animation6 = new JTextField();
+    private final JTextField animationSneakWalk = new JTextField();
     private final JTextField animation7 = new JTextField();
     private final JTextField animation8 = new JTextField();
     private final JTextField animation9 = new JTextField();
@@ -244,7 +246,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
     private final JCheckBox enable3 = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox enable4 = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox enable5 = L10N.checkbox("elementgui.common.enable", new Object[0]);
+    private final JCheckBox enableSwimForward = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox enable6 = L10N.checkbox("elementgui.common.enable", new Object[0]);
+    private final JCheckBox enableSneakWalk = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox enable7 = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox enable8 = L10N.checkbox("elementgui.common.enable", new Object[0]);
     private final JCheckBox enable9 = L10N.checkbox("elementgui.common.enable", new Object[0]);
@@ -931,7 +935,7 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         //animations page start
 
         //built in animations panel
-        JPanel animations = new JPanel(new GridLayout(21, 2, 20, 2));
+        JPanel animations = new JPanel(new GridLayout(27, 2, 20, 2));
 
         animations.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder((Color)UIManager.get("MCreatorLAF.BRIGHT_COLOR"), 1),
                 L10N.t("elementgui.animatedentity.animations_boarder", new Object[0]),
@@ -972,11 +976,23 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         animations.add(L10N.label("elementgui.animatedentity.animation_name"));
         animations.add(animation5);
 
+        animations.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/swim_forward_animation"),
+                L10N.label("elementgui.animatedentity.swim_forward_animation")));
+        animations.add(enableSwimForward);
+        animations.add(L10N.label("elementgui.animatedentity.animation_name"));
+        animations.add(animationSwimForward);
+
         animations.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/sneak_animation"),
                 L10N.label("elementgui.animatedentity.sneak_animation")));
         animations.add(enable6);
         animations.add(L10N.label("elementgui.animatedentity.animation_name"));
         animations.add(animation6);
+
+        animations.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/sneak_walk_animation"),
+                L10N.label("elementgui.animatedentity.sneak_walk_animation")));
+        animations.add(enableSneakWalk);
+        animations.add(L10N.label("elementgui.animatedentity.animation_name"));
+        animations.add(animationSneakWalk);
 
         animations.add(HelpUtils.wrapWithHelpButton(this.withEntry("geckolib/sprint_animation"),
                 L10N.label("elementgui.animatedentity.sprint_animation")));
@@ -1107,7 +1123,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         animation3.setEnabled(enable3.isSelected());
         animation4.setEnabled(enable4.isSelected());
         animation5.setEnabled(enable5.isSelected());
+        animationSwimForward.setEnabled(enableSwimForward.isSelected());
         animation6.setEnabled(enable6.isSelected());
+        animationSneakWalk.setEnabled(enableSneakWalk.isSelected());
         animation7.setEnabled(enable7.isSelected());
         animation8.setEnabled(enable8.isSelected());
         animation9.setEnabled(enable9.isSelected());
@@ -1130,8 +1148,16 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
             animation5.setEnabled(enable5.isSelected());
         });
 
+        enableSwimForward.addActionListener(actionEvent -> {
+            animationSwimForward.setEnabled(enableSwimForward.isSelected());
+        });
+
         enable6.addActionListener(actionEvent -> {
             animation6.setEnabled(enable6.isSelected());
+        });
+
+        enableSneakWalk.addActionListener(actionEvent -> {
+            animationSneakWalk.setEnabled(enableSneakWalk.isSelected());
         });
 
         enable7.addActionListener(actionEvent -> {
@@ -1239,7 +1265,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         animation3.setText(livingEntity.animation3);
         animation4.setText(livingEntity.animation4);
         animation5.setText(livingEntity.animation5);
+        animationSwimForward.setText(livingEntity.animationSwimForward);
         animation6.setText(livingEntity.animation6);
+        animationSneakWalk.setText(livingEntity.animationSneakWalk);
         animation7.setText(livingEntity.animation7);
         animation8.setText(livingEntity.animation8);
         animation9.setText(livingEntity.animation9);
@@ -1406,7 +1434,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         animation3.setEnabled(enable3.isSelected());
         animation4.setEnabled(enable4.isSelected());
         animation5.setEnabled(enable5.isSelected());
+        animationSwimForward.setEnabled(enableSwimForward.isSelected());
         animation6.setEnabled(enable6.isSelected());
+        animationSneakWalk.setEnabled(enableSneakWalk.isSelected());
         animation7.setEnabled(enable7.isSelected());
         animation8.setEnabled(enable8.isSelected());
         animation9.setEnabled(enable9.isSelected());
@@ -1428,7 +1458,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.animation3 = animation3.getText();
         livingEntity.animation4 = animation4.getText();
         livingEntity.animation5 = animation5.getText();
+        livingEntity.animationSwimForward = animationSwimForward.getText();
         livingEntity.animation6 = animation6.getText();
+        livingEntity.animationSneakWalk = animationSneakWalk.getText();
         livingEntity.animation7 = animation7.getText();
         livingEntity.animation8 = animation8.getText();
         livingEntity.animation9 = animation9.getText();
