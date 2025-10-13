@@ -1294,7 +1294,7 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 		<#if data.enable6>
 		// Sneak Walking
 		if (this.isShiftKeyDown()) {
-			return this.getAnimAndResetIfNeeded(animation6, event);
+			return this.getAnimAndResetIfNeeded(animationSneakWalk, event);
 		}
 		</#if>
 

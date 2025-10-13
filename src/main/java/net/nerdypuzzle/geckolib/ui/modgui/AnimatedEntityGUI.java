@@ -1276,7 +1276,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         enable3.setSelected(livingEntity.enable3);
         enable4.setSelected(livingEntity.enable4);
         enable5.setSelected(livingEntity.enable5);
+        enableSwimForward.setSelected(livingEntity.enableSwimForward);
         enable6.setSelected(livingEntity.enable6);
+        enableSneakWalk.setSelected(livingEntity.enableSneakWalk);
         enable7.setSelected(livingEntity.enable7);
         enable8.setSelected(livingEntity.enable8);
         enable9.setSelected(livingEntity.enable9);
@@ -1469,7 +1471,9 @@ public class AnimatedEntityGUI extends ModElementGUI<AnimatedEntity> implements 
         livingEntity.enable3 = enable3.isSelected();
         livingEntity.enable4 = enable4.isSelected();
         livingEntity.enable5 = enable5.isSelected();
+        livingEntity.enableSwimForward = enableSwimForward.isSelected();
         livingEntity.enable6 = enable6.isSelected();
+        livingEntity.enableSneakWalk = enableSneakWalk.isSelected();
         livingEntity.enable7 = enable7.isSelected();
         livingEntity.enable8 = enable8.isSelected();
         livingEntity.enable9 = enable9.isSelected();
