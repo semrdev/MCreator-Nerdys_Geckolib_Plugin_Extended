@@ -154,12 +154,8 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
                 this.scaleWidth = scale;
             </#if>
 
-        // Check if we should temporarily add any RenderLayers for custom textures
-        for (GeoRenderLayer layerToAdd : entity.boneTextureLayers.values()) {
-            if (!this.getRenderLayers().contains(layerToAdd)) {
-                this.addRenderLayer(layerToAdd);
-            }
-        }
+        // Sync render layer objects from entity's data-only render layer descriptors.
+        syncRenderLayersFromEntityData(entity);
 
         // Refresh which bones should be hidden on this render pass.
         if (!isReRender) {
@@ -175,6 +171,60 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
     private ${name}Entity.BoneColorOverride boneColorOverride;
 
     private BoneTextureLayer cachedBoneTextureLayer;
+
+    // Renderer-owned cache of BoneTextureLayer objects, keyed to match entity's renderLayerDataMap.
+    private final Map<String, BoneTextureLayer> boneTextureLayerCache = new HashMap<>();
+
+    private void syncRenderLayersFromEntityData(${name}Entity entity) {
+        // Remove cached layers whose keys no longer exist in entity data.
+        boneTextureLayerCache.keySet().removeIf(key -> !entity.renderLayerDataMap.containsKey(key));
+
+        // Create or update layers to match entity data.
+        for (Map.Entry<String, ${name}Entity.RenderLayerData> entry : entity.renderLayerDataMap.entrySet()) {
+            String key = entry.getKey();
+            ${name}Entity.RenderLayerData data = entry.getValue();
+
+            ResourceLocation texture;
+            if (data.playerUUID != null) {
+                texture = getPlayerSkin(data.playerUUID);
+            } else if (data.textureResource != null) {
+                texture = new ResourceLocation("${modid}", "textures/entities/" + data.textureResource + ".png");
+            } else {
+                continue;
+            }
+
+            BoneTextureLayer layer = boneTextureLayerCache.get(key);
+            if (layer == null) {
+                layer = new BoneTextureLayer(this, texture, data.renderType);
+                boneTextureLayerCache.put(key, layer);
+            } else {
+                layer.setTextureAndRenderType(texture, data.renderType);
+            }
+
+            // Sync bone settings from entity data to the actual layer object.
+            layer.useRendererDefaultBoneSettings = !data.overrideDefaultBoneSettings;
+            layer.hiddenBones.clear();
+            layer.hiddenBones.putAll(data.hiddenBones);
+        }
+
+        // Add cached layers to the renderer's active render layer list for this frame.
+        for (BoneTextureLayer layer : boneTextureLayerCache.values()) {
+            if (!this.getRenderLayers().contains(layer)) {
+                this.addRenderLayer(layer);
+            }
+        }
+    }
+
+    private ResourceLocation getPlayerSkin(UUID playerUUID) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.getConnection() != null) {
+            PlayerInfo playerInfo = mc.getConnection().getPlayerInfo(playerUUID);
+            if (playerInfo != null) {
+                return playerInfo.getSkinLocation();
+            }
+        }
+        return DefaultPlayerSkin.getDefaultSkin(playerUUID);
+    }
 
     @Override
     public void applyRenderLayers(PoseStack poseStack, ${name}Entity animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource,
@@ -255,8 +305,8 @@ public class ${name}Renderer extends GeoEntityRenderer<${name}Entity> {
         super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         this.cachedBoneTextureLayer = null;
 
-        // Clean up the render layers that are no longer needed.
-        for (GeoRenderLayer layerToRemove : animatable.boneTextureLayers.values()) {
+        // Clean up the texture render layers after this frame.
+        for (BoneTextureLayer layerToRemove : this.boneTextureLayerCache.values()) {
             this.renderLayers.getRenderLayers().remove(layerToRemove);
         }
 

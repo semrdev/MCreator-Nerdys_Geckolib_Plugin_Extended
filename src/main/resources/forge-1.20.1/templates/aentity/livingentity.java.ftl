@@ -1548,95 +1548,63 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
 		}
 	}
 
-    private EntityRenderer<?> cachedEntityRenderer;
-    private ${name}Renderer cached${name}Renderer;
-
-    private ${name}Renderer getAndCacheEntityRenderer() {
-        if (level().isClientSide) {
-            this.cachedEntityRenderer = Minecraft.getInstance()
-                                                 .getEntityRenderDispatcher()
-                                                 .getRenderer(this);
-            if (this.cachedEntityRenderer instanceof ${name}Renderer cached${name}Renderer) {
-                this.cached${name}Renderer = cached${name}Renderer;
-                return this.cached${name}Renderer;
-            }
-        }
-        return null;
+    // Data-only class for describing render layer configuration. No client classes referenced.
+    // The renderer (client-side) reads this data and manages the actual BoneTextureLayer objects.
+    public static class RenderLayerData {
+        public String textureResource;
+        public UUID playerUUID;
+        public String renderType;
+        public boolean overrideDefaultBoneSettings = false;
+        public final Map<String, Boolean> hiddenBones = new HashMap<>();
     }
 
-    // A hash map for storing the custom texture override render layers applied to this entity's renderer.
-    public final Map<String, BoneTextureLayer> boneTextureLayers = new HashMap<>();
-
-    private GeoBone cachedGeoBone;
-    private ResourceLocation cachedResourceLoc;
+    // A map of render layer descriptors keyed by layer name. Consumed by the renderer each frame.
+    public final Map<String, RenderLayerData> renderLayerDataMap = new HashMap<>();
 
     @Override
     public void addOrModifyTextureRenderLayer(String layerKey, String texture, String renderType) {
-        this.cached${name}Renderer = getAndCacheEntityRenderer();
-        this.cachedResourceLoc = new ResourceLocation("${modid}", "textures/entities/" + texture + ".png");
-
-        this.processTextureLayerUpdate(layerKey, renderType);
+        RenderLayerData data = this.renderLayerDataMap.computeIfAbsent(layerKey, k -> new RenderLayerData());
+        data.textureResource = texture;
+        data.playerUUID = null;
+        data.renderType = renderType;
     }
 
     @Override
     public void addOrModifyPlayerRenderLayer(String layerKey, Player player, String renderType) {
         if (player != null) {
-            this.cached${name}Renderer = getAndCacheEntityRenderer();
-            this.cachedResourceLoc = getPlayerSkin(player);
-            this.processTextureLayerUpdate(layerKey, renderType);
-        }
-    }
-
-    private void processTextureLayerUpdate(String layerKey, String renderType) {
-        if (this.cached${name}Renderer != null && this.cachedResourceLoc != null) {
-
-            BoneTextureLayer textureLayer;
-            if (this.boneTextureLayers.containsKey(layerKey)) {
-                textureLayer = this.boneTextureLayers.get(layerKey);
-                textureLayer.setTextureAndRenderType(this.cachedResourceLoc, renderType);
-            }
-            else {
-                textureLayer = new BoneTextureLayer(this.cached${name}Renderer, this.cachedResourceLoc, renderType);
-                this.boneTextureLayers.put(layerKey, textureLayer);
-            }
+            RenderLayerData data = this.renderLayerDataMap.computeIfAbsent(layerKey, k -> new RenderLayerData());
+            data.textureResource = null;
+            data.playerUUID = player.getUUID();
+            data.renderType = renderType;
         }
     }
 
     @Override
     public void setRenderLayerOverridesBoneToggles(String layerKey, Boolean override) {
-        if (this.boneTextureLayers.containsKey(layerKey)) {
-            BoneTextureLayer textureLayer = this.boneTextureLayers.get(layerKey);
-            textureLayer.toggleOverrideDefaultBoneSettings(override);
+        RenderLayerData data = this.renderLayerDataMap.get(layerKey);
+        if (data != null) {
+            data.overrideDefaultBoneSettings = override;
         }
     }
 
     @Override
     public void setRenderLayerBoneSettings(String layerKey, String bones, Boolean hide, Boolean recursive) {
-        if (this.boneTextureLayers.containsKey(layerKey)) {
-            BoneTextureLayer textureLayer = this.boneTextureLayers.get(layerKey);
-            textureLayer.toggleLayerBones(bones, !hide, recursive);
+        RenderLayerData data = this.renderLayerDataMap.get(layerKey);
+        if (data != null) {
+            String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+            for (String bone : boneArray) {
+                if (hide) {
+                    data.hiddenBones.put(bone, recursive);
+                } else {
+                    data.hiddenBones.remove(bone);
+                }
+            }
         }
     }
 
     @Override
     public void removeRenderLayer(String layerKey) {
-        this.boneTextureLayers.remove(layerKey);
-    }
-
-    private ResourceLocation getPlayerSkin(Player player) {
-        if (player != null && player.getGameProfile() != null) {
-            Minecraft mc = Minecraft.getInstance();
-            SkinManager skinManager = mc.getSkinManager();
-                if (skinManager != null) {
-                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures =
-                    skinManager.getInsecureSkinInformation(player.getGameProfile());
-                    if (textures.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                        return skinManager.registerTexture(textures.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-                    }
-                }
-                return DefaultPlayerSkin.getDefaultSkin(player.getUUID());
-            }
-        return null;
+        this.renderLayerDataMap.remove(layerKey);
     }
 
 	private boolean overridePassengerOffset = false;
