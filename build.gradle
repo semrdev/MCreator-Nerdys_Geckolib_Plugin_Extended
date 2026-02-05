@@ -21,7 +21,7 @@ dependencies {
 }
 
 tasks.jar {
-    archiveFileName.set("SMR_Geckolib_Plugin_24.zip")
+    archiveFileName.set("SMR_Geckolib_Plugin_25.zip")
 }
 
 tasks.register('runMCreatorWithPlugin', JavaExec) {
