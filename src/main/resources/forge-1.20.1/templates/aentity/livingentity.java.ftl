@@ -1592,6 +1592,9 @@ public class ${name}Entity extends ${extendsClass} implements GeoEntity, IGeckoL
         RenderLayerData data = this.renderLayerDataMap.get(layerKey);
         if (data != null) {
             String[] boneArray = bones.replaceAll("\\s+", "").split(",");
+            if (boneArray != null && boneArray.length > 0 && !boneArray[0].isEmpty()) {
+                data.overrideDefaultBoneSettings = true;
+            }
             for (String bone : boneArray) {
                 if (hide) {
                     data.hiddenBones.put(bone, recursive);
