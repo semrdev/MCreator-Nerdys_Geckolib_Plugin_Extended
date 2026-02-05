@@ -267,8 +267,6 @@ public class PluginEventTriggers {
 
         mcreator.mv.resourcesPan.addResourcesTab(L10N.t("menubar.geckolib", new Object[0]), panel);
         mcreator.getMainMenuBar().add(geckolib);
-
-        forceCheckUpdates(mcreator);
     }
 
 }
