@@ -197,6 +197,21 @@ public final class JavabridgeReplacement {
         return retval;
     }
 
+    /**
+     * Loads entity data groups as entries suitable for the entity dropdown,
+     * using the DATAGROUP: prefix so FTL templates can detect and handle them.
+     */
+    public static List<DataListEntry> loadEntityDataGroupsAsEntityEntries(Workspace workspace) {
+        return workspace.getModElements().stream()
+                .filter(mu -> mu.getGeneratableElement() instanceof AEntityDataGroup)
+                .map(mu -> {
+                    DataListEntry.Dummy entry = new DataListEntry.Dummy("DATAGROUP:" + mu.getName());
+                    entry.setReadableName(mu.getName() + " (Data Group)");
+                    return (DataListEntry) entry;
+                })
+                .collect(Collectors.toList());
+    }
+
     private static List<DataListEntry> getCustomElements(@Nonnull Workspace workspace, Predicate<ModElement> predicate) {
         return (List)workspace.getModElements().stream().filter(predicate).map(DataListEntry.Custom::new).collect(Collectors.toList());
     }
@@ -213,8 +228,13 @@ public final class JavabridgeReplacement {
                                                               @Nullable String customEntryProviders, JSObject callback) {
         String[] retval = switch (type) {
             case "entity" -> openDataListEntrySelector(
-                    w -> ElementUtil.loadAllEntities(w).stream().filter(e -> e.isSupportedInWorkspace(w)).toList(),
-                    "entity");
+                    w -> {
+                        List<DataListEntry> entities = new ArrayList<>(
+                                ElementUtil.loadAllEntities(w).stream().filter(e -> e.isSupportedInWorkspace(w)).toList());
+                        entities.addAll(loadEntityDataGroupsAsEntityEntries(w));
+                        Collections.sort(entities);
+                        return entities;
+                    }, "entity");
             case "spawnableEntity" -> openDataListEntrySelector(
                     w -> ElementUtil.loadAllSpawnableEntities(w).stream().filter(e -> e.isSupportedInWorkspace(w))
                             .toList(), "entity");
@@ -313,7 +333,11 @@ public final class JavabridgeReplacement {
                         .map(ModElement::getName).collect(Collectors.toList());
                 break;
             case "entity":
-                return ElementUtil.loadAllEntities(workspace).stream().map(DataListEntry::getName).toArray(String[]::new);
+                List<String> entityList = new ArrayList<>(
+                        ElementUtil.loadAllEntities(workspace).stream().map(DataListEntry::getName).toList());
+                entityList.addAll(loadEntityDataGroupsAsEntityEntries(workspace).stream()
+                        .map(DataListEntry::getName).toList());
+                return entityList.toArray(String[]::new);
             case "spawnableEntity":
                 return ElementUtil.loadAllSpawnableEntities(workspace).stream().map(DataListEntry::getName)
                         .toArray(String[]::new);
@@ -400,6 +424,9 @@ public final class JavabridgeReplacement {
      * @return The readable name of the passed entry, or an empty string if it can't find a readable name
      */
     @SuppressWarnings("unused") public String getReadableNameOf(String value, String type) {
+        if (value.startsWith("DATAGROUP:"))
+            return value.substring(10) + " (Data Group)";
+
         if (value.startsWith("CUSTOM:"))
             return value.substring(7);
 
